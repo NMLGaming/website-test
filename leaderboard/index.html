@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Website Test</title>
+  <title>Leaderboard — Website Test</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -25,15 +25,37 @@
   <!-- ===== Main Content ===== -->
   <main>
     <div class="card">
-      <h1>Website Test</h1>
-      <p class="subtitle">
-        Đây là trang demo đơn giản được xây dựng bằng HTML, CSS và JavaScript thuần.<br />
-        Chọn một trang bên dưới để bắt đầu khám phá.
-      </p>
+      <h2>🏆 Leaderboard</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rank">1</td>
+              <td>Steve</td>
+              <td class="score">1,000</td>
+            </tr>
+            <tr>
+              <td class="rank">2</td>
+              <td>Alex</td>
+              <td class="score">900</td>
+            </tr>
+            <tr>
+              <td class="rank">3</td>
+              <td>Herobrine</td>
+              <td class="score">850</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
       <div class="btn-group">
-        <a class="btn btn-primary" href="/home">Home</a>
-        <a class="btn btn-secondary" href="/leaderboard">Leaderboard</a>
-        <a class="btn btn-secondary" href="/profile">Profile</a>
+        <a class="btn btn-secondary" href="/">← Quay về Trang chủ</a>
       </div>
     </div>
   </main>

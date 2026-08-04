@@ -1,66 +1,95 @@
 # Website Test
 
-Website tĩnh đơn giản dùng HTML, CSS và JavaScript thuần — không có framework, không có CDN.
+Website tĩnh nhiều trang dùng HTML, CSS và JavaScript thuần — không framework, không CDN.
 
 ## Cấu trúc thư mục
 
 ```
-website-test/
-├── index.html   # Cấu trúc trang
-├── style.css    # Giao diện & animation
-├── script.js    # Logic tương tác
-└── README.md    # Tài liệu này
+vercel-website/
+├── index.html          # Trang chủ  →  /
+├── style.css           # CSS dùng chung cho tất cả trang
+├── script.js           # JS dùng chung (menu, active link, fade transition)
+├── home/
+│   └── index.html      # Trang Home  →  /home
+├── leaderboard/
+│   └── index.html      # Trang Leaderboard  →  /leaderboard
+├── profile/
+│   └── index.html      # Trang Profile  →  /profile
+├── vercel.json         # Cấu hình Vercel (clean URLs)
+└── README.md
 ```
+
+## Các trang
+
+| URL             | Nội dung                        |
+|-----------------|---------------------------------|
+| `/`             | Trang chủ, điều hướng chính     |
+| `/home`         | Lời chào                        |
+| `/leaderboard`  | Bảng xếp hạng người chơi        |
+| `/profile`      | Thông tin nhân vật               |
 
 ## Chạy trên máy tính
 
-Không cần cài đặt gì cả. Chỉ cần mở file `index.html` bằng trình duyệt:
-
-**Cách 1 — Mở trực tiếp:**
-```
-Nhấp đôi vào file index.html
-```
-
-**Cách 2 — Dùng VS Code Live Server (khuyên dùng):**
+**Cách 1 — VS Code Live Server (khuyên dùng):**
 1. Cài extension **Live Server** trong VS Code.
-2. Mở thư mục `website-test` trong VS Code.
+2. Mở thư mục `vercel-website` trong VS Code.
 3. Nhấp chuột phải vào `index.html` → **Open with Live Server**.
 
-**Cách 3 — Dùng Python (nếu đã cài Python):**
+> ⚠️ Mở `index.html` bằng cách nhấp đôi trực tiếp sẽ không truy cập được `/home`, `/leaderboard`, `/profile` vì trình duyệt cần một web server để xử lý đường dẫn. Hãy dùng Live Server hoặc Python.
+
+**Cách 2 — Python:**
 ```bash
-cd website-test
+cd vercel-website
 python -m http.server 8080
 # Mở trình duyệt tại http://localhost:8080
+```
+
+**Cách 3 — Node.js (npx):**
+```bash
+cd vercel-website
+npx serve .
 ```
 
 ## Deploy lên Vercel
 
 ### Bước 1 — Đưa code lên GitHub
 
-1. Tạo repository mới trên [github.com](https://github.com).
-2. Chạy các lệnh sau trong terminal:
-
 ```bash
-cd website-test
+cd vercel-website
 git init
 git add .
 git commit -m "first commit"
 git branch -M main
-git remote add origin https://github.com/<tên-của-bạn>/<tên-repo>.git
+git remote add origin https://github.com/<username>/<repo>.git
 git push -u origin main
 ```
 
 ### Bước 2 — Import vào Vercel
 
-1. Truy cập [vercel.com](https://vercel.com) và đăng nhập (hoặc tạo tài khoản miễn phí).
+1. Truy cập [vercel.com](https://vercel.com) → Đăng nhập.
 2. Nhấn **"Add New… → Project"**.
-3. Chọn repository GitHub vừa tạo → nhấn **"Import"**.
-4. Để nguyên tất cả cài đặt mặc định (Vercel tự nhận ra đây là website tĩnh).
+3. Chọn repository vừa tạo → **"Import"**.
+4. Để nguyên mọi cài đặt mặc định (Vercel tự nhận ra static site).
 5. Nhấn **"Deploy"**.
 
-Sau vài giây, Vercel sẽ cấp cho bạn một URL dạng `https://ten-du-an.vercel.app` — chia sẻ ngay được!
+Sau vài giây, các URL sau sẽ hoạt động ngay:
 
-### Lưu ý
+```
+https://ten-web.vercel.app/
+https://ten-web.vercel.app/home
+https://ten-web.vercel.app/leaderboard
+https://ten-web.vercel.app/profile
+```
 
-- Mỗi lần bạn `git push` lên `main`, Vercel sẽ tự động deploy lại.
-- Không cần `vercel.json` hay bất kỳ file cấu hình nào thêm.
+### Tại sao `/home` hoạt động mà không cần `.html`?
+
+File `vercel.json` có `"cleanUrls": true` — Vercel tự động map:
+- `/home` → `home/index.html`
+- `/leaderboard` → `leaderboard/index.html`
+- `/profile` → `profile/index.html`
+
+Không cần cấu hình gì thêm.
+
+### Cập nhật sau này
+
+Mỗi lần bạn `git push` lên nhánh `main`, Vercel sẽ tự động deploy lại.
