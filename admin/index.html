@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — VIELIST</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ===== Nav ===== -->
+  <nav>
+    <a class="nav-logo" href="/">VIELIST</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/"><span class="nav-dot"></span>Home</a></li>
+      <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
+      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
+      <li><a href="/player"><span class="nav-dot"></span>Player</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== Login ===== -->
+  <main>
+    <div id="login-section">
+      <div class="login-wrap">
+        <div class="glass-card login-card">
+          <h1>🔐 Admin</h1>
+          <p>Đăng nhập để quản lý thông báo trên VIELIST.</p>
+          <form id="login-form">
+            <div class="form-group">
+              <label for="login-user">Tên đăng nhập</label>
+              <input type="text" id="login-user" placeholder="admin" autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="login-pass">Mật khẩu</label>
+              <input type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password" />
+            </div>
+            <button class="btn btn-primary btn-full" type="submit">Đăng nhập</button>
+            <p class="login-error" id="login-error"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Admin Panel ===== -->
+    <div id="admin-panel">
+      <div class="page-header">
+        <h1>🛠️ Quản lý thông báo</h1>
+        <p>Đăng, sửa, xóa thông báo hiển thị trên trang <a href="/" style="color:var(--cyan)">Home</a>.</p>
+      </div>
+
+      <div class="glass-card">
+        <div class="admin-toolbar">
+          <h2>Danh sách thông báo</h2>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="add-btn">➕ Đăng thông báo</button>
+            <button class="btn btn-ghost" id="logout-btn">🚪 Đăng xuất</button>
+          </div>
+        </div>
+        <div class="admin-list" id="admin-announce-list">
+          <!-- rendered by admin.js -->
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p><strong>© 2026 VIELIST</strong> &mdash; Minecraft Leaderboard &mdash;
+      <a href="/is7mc">IS7MC.NET</a> &bull; <a href="/kingmc">KINGMC.VN</a>
+    </p>
+  </footer>
+
+  <!-- ===== Modal: Add / Edit ===== -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-box">
+      <h3 id="modal-title">➕ Đăng thông báo mới</h3>
+      <form id="modal-form">
+        <div class="form-group">
+          <label>Loại thông báo</label>
+          <select name="m-type">
+            <option value="news">📢 Tin tức</option>
+            <option value="update">🚀 Update</option>
+            <option value="maintenance">🔧 Bảo trì</option>
+            <option value="event">⚡ Sự kiện</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Icon (emoji)</label>
+          <input type="text" name="m-icon" placeholder="📢" maxlength="4" />
+        </div>
+        <div class="form-group">
+          <label>Tiêu đề</label>
+          <input type="text" name="m-title" placeholder="Tiêu đề thông báo…" required />
+        </div>
+        <div class="form-group">
+          <label>Ngày đăng</label>
+          <input type="date" name="m-date" required />
+        </div>
+        <div class="form-group">
+          <label>Nội dung</label>
+          <textarea name="m-content" placeholder="Nội dung chi tiết…" required></textarea>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="modal-cancel">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <button id="back-top" title="Lên đầu trang">↑</button>
+  <div id="toast-container"></div>
+
+  <script src="/assets/js/data.js"></script>
+  <script src="/script.js"></script>
+  <script src="/assets/js/admin.js"></script>
+</body>
+</html>

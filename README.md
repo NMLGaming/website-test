@@ -1,64 +1,99 @@
-# Website Test
+# VIELIST — Minecraft Leaderboard
 
-Website tĩnh nhiều trang dùng HTML, CSS và JavaScript thuần — không framework, không CDN.
+Website quản lý bảng xếp hạng Minecraft cho IS7MC.NET và KINGMC.VN.
+Xây dựng bằng HTML, CSS và JavaScript thuần — không framework, không CDN.
 
-## Cấu trúc thư mục
+## Cấu trúc project
 
 ```
-vercel-website/
-├── index.html          # Trang chủ  →  /
-├── style.css           # CSS dùng chung cho tất cả trang
-├── script.js           # JS dùng chung (menu, active link, fade transition)
+minecraft-leaderboard/
+├── index.html              # Trang Home (thông báo)  →  /
+├── style.css               # Toàn bộ CSS dùng chung
+├── script.js               # JS dùng chung (nav, transitions, toast)
 ├── home/
-│   └── index.html      # Trang Home  →  /home
-├── leaderboard/
-│   └── index.html      # Trang Leaderboard  →  /leaderboard
-├── profile/
-│   └── index.html      # Trang Profile  →  /profile
-├── vercel.json         # Cấu hình Vercel (clean URLs)
+│   └── index.html          # Redirect về /
+├── is7mc/
+│   └── index.html          # Leaderboard IS7MC.NET  →  /is7mc
+├── kingmc/
+│   └── index.html          # Leaderboard KINGMC.VN  →  /kingmc
+├── player/
+│   └── index.html          # Tìm kiếm player       →  /player
+├── admin/
+│   └── index.html          # Admin panel           →  /admin
+├── assets/
+│   ├── data/
+│   │   ├── announcements.json   # Dữ liệu thông báo mặc định
+│   │   ├── leaderboard.json     # Dữ liệu bảng xếp hạng
+│   │   └── players.json         # Dữ liệu người chơi
+│   └── js/
+│       ├── data.js          # Data layer (đổi sang API thật ở đây)
+│       ├── announcements.js # Render thông báo
+│       ├── leaderboard.js   # Render bảng xếp hạng
+│       ├── player.js        # Tìm kiếm player
+│       └── admin.js         # CRUD thông báo
+├── vercel.json              # Cấu hình clean URLs
 └── README.md
 ```
 
 ## Các trang
 
-| URL             | Nội dung                        |
-|-----------------|---------------------------------|
-| `/`             | Trang chủ, điều hướng chính     |
-| `/home`         | Lời chào                        |
-| `/leaderboard`  | Bảng xếp hạng người chơi        |
-| `/profile`      | Thông tin nhân vật               |
+| URL         | Nội dung                          |
+|-------------|-----------------------------------|
+| `/`         | Trang chủ — thông báo mới nhất   |
+| `/is7mc`    | Leaderboard IS7MC.NET             |
+| `/kingmc`   | Leaderboard KINGMC.VN             |
+| `/player`   | Tìm kiếm thông tin người chơi    |
+| `/admin`    | Quản trị thông báo (đăng/sửa/xóa)|
+
+## Admin Panel
+
+Truy cập `/admin` và đăng nhập:
+
+- **Tên đăng nhập:** `admin`
+- **Mật khẩu:** `vielist2026`
+
+Sau khi đăng nhập, bạn có thể:
+- ➕ Đăng thông báo mới
+- ✏️ Sửa thông báo
+- 🗑️ Xóa thông báo
+
+Thông báo được lưu vào `localStorage` của trình duyệt và hiển thị ngay ở trang Home.
+Người dùng thường chỉ thấy thông báo ở `/`, không thể vào `/admin`.
+
+> ⚠️ **Lưu ý bảo mật:** Hiện tại mật khẩu được kiểm tra phía client (demo).
+> Để dùng thật, hãy thay `assets/js/data.js` để gọi API backend thực sự.
 
 ## Chạy trên máy tính
 
 **Cách 1 — VS Code Live Server (khuyên dùng):**
 1. Cài extension **Live Server** trong VS Code.
-2. Mở thư mục `vercel-website` trong VS Code.
-3. Nhấp chuột phải vào `index.html` → **Open with Live Server**.
-
-> ⚠️ Mở `index.html` bằng cách nhấp đôi trực tiếp sẽ không truy cập được `/home`, `/leaderboard`, `/profile` vì trình duyệt cần một web server để xử lý đường dẫn. Hãy dùng Live Server hoặc Python.
+2. Mở thư mục `minecraft-leaderboard` trong VS Code.
+3. Nhấp chuột phải `index.html` → **Open with Live Server**.
 
 **Cách 2 — Python:**
 ```bash
-cd vercel-website
+cd minecraft-leaderboard
 python -m http.server 8080
-# Mở trình duyệt tại http://localhost:8080
+# Mở http://localhost:8080
 ```
 
-**Cách 3 — Node.js (npx):**
+**Cách 3 — Node.js:**
 ```bash
-cd vercel-website
+cd minecraft-leaderboard
 npx serve .
 ```
 
+> Cần web server để các đường dẫn `/is7mc`, `/player`… hoạt động đúng.
+
 ## Deploy lên Vercel
 
-### Bước 1 — Đưa code lên GitHub
+### Bước 1 — Push lên GitHub
 
 ```bash
-cd vercel-website
+cd minecraft-leaderboard
 git init
 git add .
-git commit -m "first commit"
+git commit -m "init: VIELIST Minecraft Leaderboard"
 git branch -M main
 git remote add origin https://github.com/<username>/<repo>.git
 git push -u origin main
@@ -66,30 +101,47 @@ git push -u origin main
 
 ### Bước 2 — Import vào Vercel
 
-1. Truy cập [vercel.com](https://vercel.com) → Đăng nhập.
-2. Nhấn **"Add New… → Project"**.
-3. Chọn repository vừa tạo → **"Import"**.
-4. Để nguyên mọi cài đặt mặc định (Vercel tự nhận ra static site).
-5. Nhấn **"Deploy"**.
+1. Truy cập [vercel.com](https://vercel.com) → **Add New → Project**.
+2. Chọn repo GitHub → **Import**.
+3. Để nguyên mặc định (Vercel nhận ra static site).
+4. Nhấn **Deploy**.
 
-Sau vài giây, các URL sau sẽ hoạt động ngay:
-
+Sau vài giây, các URL sau sẽ hoạt động:
 ```
 https://ten-web.vercel.app/
-https://ten-web.vercel.app/home
-https://ten-web.vercel.app/leaderboard
-https://ten-web.vercel.app/profile
+https://ten-web.vercel.app/is7mc
+https://ten-web.vercel.app/kingmc
+https://ten-web.vercel.app/player
+https://ten-web.vercel.app/admin
 ```
 
-### Tại sao `/home` hoạt động mà không cần `.html`?
+Clean URLs hoạt động nhờ `"cleanUrls": true` trong `vercel.json`.
 
-File `vercel.json` có `"cleanUrls": true` — Vercel tự động map:
-- `/home` → `home/index.html`
-- `/leaderboard` → `leaderboard/index.html`
-- `/profile` → `profile/index.html`
+## Nâng cấp lên production
 
-Không cần cấu hình gì thêm.
+### Đổi dữ liệu leaderboard
 
-### Cập nhật sau này
+Sửa file `assets/data/leaderboard.json` — cấu trúc JSON đã có sẵn.
 
-Mỗi lần bạn `git push` lên nhánh `main`, Vercel sẽ tự động deploy lại.
+### Kết nối API thật
+
+Mở `assets/js/data.js`, thay các `fetch('/assets/data/...')` bằng URL API backend:
+
+```js
+// Ví dụ
+async function getLeaderboard(server) {
+  const res = await fetch('https://api.vielist.net/leaderboard/' + server);
+  return res.json();
+}
+```
+
+### Xác thực admin thật
+
+Thay phần login trong `assets/js/admin.js` để gọi API:
+```js
+// Thay bằng POST /api/auth/login
+const res = await fetch('/api/auth/login', {
+  method: 'POST',
+  body: JSON.stringify({ username, password })
+});
+```

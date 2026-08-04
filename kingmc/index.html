@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VIELIST — Thông báo</title>
+  <title>KINGMC.VN — VIELIST Leaderboard</title>
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -25,12 +25,22 @@
   <!-- ===== Main ===== -->
   <main>
     <div class="page-header">
-      <h1>📣 Thông báo</h1>
-      <p>Tin tức mới nhất từ <span class="accent">VIELIST</span> — cập nhật, sự kiện và bảo trì server.</p>
+      <h1>🏰 KINGMC.VN</h1>
+      <p>Bảng xếp hạng chính thức của server <span class="accent">KINGMC.VN</span>.</p>
     </div>
 
-    <div class="announce-grid" id="announce-grid">
-      <!-- Rendered by announcements.js -->
+    <div class="lb-grid">
+      <!-- TOP PVP -->
+      <div class="lb-section">
+        <h2><span class="icon">⚔️</span> TOP PvP</h2>
+        <div id="lb-pvp"><!-- rendered by leaderboard.js --></div>
+      </div>
+
+      <!-- TOP KING -->
+      <div class="lb-section">
+        <h2><span class="icon">👑</span> TOP King</h2>
+        <div id="lb-king"><!-- rendered by leaderboard.js --></div>
+      </div>
     </div>
   </main>
 
@@ -41,14 +51,12 @@
     </p>
   </footer>
 
-  <!-- Back to top -->
   <button id="back-top" title="Lên đầu trang">↑</button>
-
-  <!-- Toast container -->
   <div id="toast-container"></div>
 
+  <script>window.LB_SERVER = 'kingmc';</script>
   <script src="/assets/js/data.js"></script>
   <script src="/script.js"></script>
-  <script src="/assets/js/announcements.js"></script>
+  <script src="/assets/js/leaderboard.js"></script>
 </body>
 </html>

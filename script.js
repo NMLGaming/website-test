@@ -1,60 +1,93 @@
 /**
- * script.js — Logic dùng chung cho tất cả các trang.
+ * script.js — Shared logic across all pages.
  */
 
 // ============================================================
-// Hamburger menu (mobile)
+// Nav: Mobile toggle
 // ============================================================
-(function initMobileMenu() {
+(function () {
   const toggle = document.getElementById('nav-toggle');
   const links  = document.getElementById('nav-links');
   if (!toggle || !links) return;
 
   toggle.addEventListener('click', function () {
-    const isOpen = links.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', isOpen.toString());
+    const open = links.classList.toggle('open');
+    toggle.classList.toggle('open', open);
+    toggle.setAttribute('aria-expanded', String(open));
   });
 
-  // Đóng menu khi bấm ra ngoài
+  // Close on outside click
   document.addEventListener('click', function (e) {
-    if (!toggle.contains(e.target) && !links.contains(e.target)) {
+    if (!nav.contains(e.target)) {
       links.classList.remove('open');
+      toggle.classList.remove('open');
       toggle.setAttribute('aria-expanded', 'false');
     }
   });
+
+  const nav = document.querySelector('nav');
 })();
 
 // ============================================================
-// Đánh dấu link đang active dựa trên URL hiện tại
+// Nav: Highlight active link
 // ============================================================
-(function highlightActiveNav() {
-  const path   = window.location.pathname.replace(/\/$/, '') || '/';
-  const anchors = document.querySelectorAll('#nav-links a');
-
-  anchors.forEach(function (a) {
+(function () {
+  const path = window.location.pathname.replace(/\/$/, '') || '/';
+  document.querySelectorAll('#nav-links a').forEach(function (a) {
     const href = a.getAttribute('href').replace(/\/$/, '') || '/';
-    if (href === path) {
-      a.classList.add('active');
-    }
+    if (href === path) a.classList.add('active');
   });
 })();
 
 // ============================================================
-// Chuyển trang mượt (fade-out trước khi navigate)
+// Page transition (fade out → navigate)
 // ============================================================
-(function smoothPageTransition() {
-  document.querySelectorAll('a[href]').forEach(function (a) {
+(function () {
+  document.addEventListener('click', function (e) {
+    const a = e.target.closest('a[href]');
+    if (!a) return;
     const href = a.getAttribute('href');
-    // Bỏ qua các liên kết ngoài hoặc anchor
-    if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto')) return;
-
-    a.addEventListener('click', function (e) {
-      e.preventDefault();
-      document.body.style.transition = 'opacity 0.2s ease';
-      document.body.style.opacity   = '0';
-      setTimeout(function () {
-        window.location.href = href;
-      }, 200);
-    });
+    if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto') || href.startsWith('javascript')) return;
+    if (a.target === '_blank') return;
+    e.preventDefault();
+    document.body.style.transition = 'opacity 0.18s ease';
+    document.body.style.opacity = '0';
+    setTimeout(function () { window.location.href = href; }, 190);
   });
 })();
+
+// ============================================================
+// Back to top button
+// ============================================================
+(function () {
+  const btn = document.getElementById('back-top');
+  if (!btn) return;
+  window.addEventListener('scroll', function () {
+    btn.classList.toggle('visible', window.scrollY > 300);
+  }, { passive: true });
+  btn.addEventListener('click', function () {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+// ============================================================
+// Toast notification utility (global)
+// ============================================================
+window.showToast = function (msg, type) {
+  type = type || 'success';
+  var container = document.getElementById('toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.id = 'toast-container';
+    document.body.appendChild(container);
+  }
+  var toast = document.createElement('div');
+  toast.className = 'toast toast-' + type;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(function () {
+    toast.style.transition = 'opacity 0.3s ease';
+    toast.style.opacity = '0';
+    setTimeout(function () { toast.remove(); }, 320);
+  }, 3000);
+};
