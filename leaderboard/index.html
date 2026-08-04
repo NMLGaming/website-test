@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Leaderboard — Website Test</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ===== Navigation ===== -->
+  <nav>
+    <a class="nav-logo" href="/">Website Test</a>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Mở menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/">Trang chủ</a></li>
+      <li><a href="/home">Home</a></li>
+      <li><a href="/leaderboard">Leaderboard</a></li>
+      <li><a href="/profile">Profile</a></li>
+    </ul>
+  </nav>
+
+  <!-- ===== Main Content ===== -->
+  <main>
+    <div class="card">
+      <h2>🏆 Leaderboard</h2>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Player</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rank">1</td>
+              <td>Steve</td>
+              <td class="score">1,000</td>
+            </tr>
+            <tr>
+              <td class="rank">2</td>
+              <td>Alex</td>
+              <td class="score">900</td>
+            </tr>
+            <tr>
+              <td class="rank">3</td>
+              <td>Herobrine</td>
+              <td class="score">850</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="btn-group">
+        <a class="btn btn-secondary" href="/">← Quay về Trang chủ</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p>Website Test &mdash; HTML / CSS / JS thuần</p>
+  </footer>
+
+  <script src="/script.js"></script>
+</body>
+</html>
