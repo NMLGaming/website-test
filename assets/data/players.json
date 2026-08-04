@@ -1,0 +1,17 @@
+[
+  { "username": "xXSteve_KingXx", "server": "IS7MC",  "pvp": 12480, "king": 9900,  "pvpRank": 1,  "kingRank": 1,  "updated": "2026-08-01" },
+  { "username": "AlexVN",          "server": "IS7MC",  "pvp": 10920, "king": 6830,  "pvpRank": 2,  "kingRank": 4,  "updated": "2026-08-01" },
+  { "username": "Herobrine",        "server": "IS7MC",  "pvp": 9750,  "king": 5120,  "pvpRank": 3,  "kingRank": 6,  "updated": "2026-08-01" },
+  { "username": "NoobSlayer99",     "server": "IS7MC",  "pvp": 8640,  "king": 2110,  "pvpRank": 4,  "kingRank": 10, "updated": "2026-08-01" },
+  { "username": "DragonRider",      "server": "IS7MC",  "pvp": 7890,  "king": 8740,  "pvpRank": 5,  "kingRank": 2,  "updated": "2026-08-01" },
+  { "username": "ShadowWolf",       "server": "IS7MC",  "pvp": 6540,  "king": 4460,  "pvpRank": 6,  "kingRank": 7,  "updated": "2026-08-01" },
+  { "username": "IceQueen",         "server": "IS7MC",  "pvp": 5820,  "king": 7560,  "pvpRank": 7,  "kingRank": 3,  "updated": "2026-08-01" },
+  { "username": "FireLord2K",       "server": "IS7MC",  "pvp": 4970,  "king": 3780,  "pvpRank": 8,  "kingRank": 8,  "updated": "2026-08-01" },
+  { "username": "NightCrawler",     "server": "IS7MC",  "pvp": 4120,  "king": 2940,  "pvpRank": 9,  "kingRank": 9,  "updated": "2026-08-01" },
+  { "username": "StarKiller",       "server": "IS7MC",  "pvp": 3680,  "king": 5990,  "pvpRank": 10, "kingRank": 5,  "updated": "2026-08-01" },
+  { "username": "PhoenixKing",     "server": "KINGMC", "pvp": 15200, "king": 11500, "pvpRank": 1,  "kingRank": 1,  "updated": "2026-08-01" },
+  { "username": "ThunderBolt",     "server": "KINGMC", "pvp": 13400, "king": 8600,  "pvpRank": 2,  "kingRank": 3,  "updated": "2026-08-01" },
+  { "username": "BladeRunner",     "server": "KINGMC", "pvp": 11800, "king": 6000,  "pvpRank": 3,  "kingRank": 5,  "updated": "2026-08-01" },
+  { "username": "GhostRecon",      "server": "KINGMC", "pvp": 10200, "king": 9800,  "pvpRank": 4,  "kingRank": 2,  "updated": "2026-08-01" },
+  { "username": "VoidWalker",      "server": "KINGMC", "pvp": 7600,  "king": 7200,  "pvpRank": 6,  "kingRank": 4,  "updated": "2026-08-01" }
+]
