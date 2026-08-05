@@ -1,0 +1,54 @@
+{
+  "is7mc": {
+    "pvp": [
+      { "rank": 1,  "username": "xXSteve_KingXx", "score": 12480 },
+      { "rank": 2,  "username": "AlexVN",          "score": 10920 },
+      { "rank": 3,  "username": "Herobrine",        "score": 9750  },
+      { "rank": 4,  "username": "NoobSlayer99",     "score": 8640  },
+      { "rank": 5,  "username": "DragonRider",      "score": 7890  },
+      { "rank": 6,  "username": "ShadowWolf",       "score": 6540  },
+      { "rank": 7,  "username": "IceQueen",         "score": 5820  },
+      { "rank": 8,  "username": "FireLord2K",       "score": 4970  },
+      { "rank": 9,  "username": "NightCrawler",     "score": 4120  },
+      { "rank": 10, "username": "StarKiller",       "score": 3680  }
+    ],
+    "king": [
+      { "rank": 1,  "username": "xXSteve_KingXx", "score": 9900 },
+      { "rank": 2,  "username": "DragonRider",     "score": 8740 },
+      { "rank": 3,  "username": "IceQueen",        "score": 7560 },
+      { "rank": 4,  "username": "AlexVN",          "score": 6830 },
+      { "rank": 5,  "username": "StarKiller",      "score": 5990 },
+      { "rank": 6,  "username": "Herobrine",       "score": 5120 },
+      { "rank": 7,  "username": "ShadowWolf",      "score": 4460 },
+      { "rank": 8,  "username": "FireLord2K",      "score": 3780 },
+      { "rank": 9,  "username": "NightCrawler",    "score": 2940 },
+      { "rank": 10, "username": "NoobSlayer99",    "score": 2110 }
+    ]
+  },
+  "kingmc": {
+    "pvp": [
+      { "rank": 1,  "username": "PhoenixKing",     "score": 15200 },
+      { "rank": 2,  "username": "ThunderBolt",     "score": 13400 },
+      { "rank": 3,  "username": "BladeRunner",     "score": 11800 },
+      { "rank": 4,  "username": "GhostRecon",      "score": 10200 },
+      { "rank": 5,  "username": "LightningFang",   "score": 8900  },
+      { "rank": 6,  "username": "VoidWalker",      "score": 7600  },
+      { "rank": 7,  "username": "StormBreaker",    "score": 6450  },
+      { "rank": 8,  "username": "CrimsonBlade",    "score": 5300  },
+      { "rank": 9,  "username": "ArcticFox",       "score": 4100  },
+      { "rank": 10, "username": "DarkMatter",      "score": 3050  }
+    ],
+    "king": [
+      { "rank": 1,  "username": "PhoenixKing",     "score": 11500 },
+      { "rank": 2,  "username": "GhostRecon",      "score": 9800  },
+      { "rank": 3,  "username": "ThunderBolt",     "score": 8600  },
+      { "rank": 4,  "username": "VoidWalker",      "score": 7200  },
+      { "rank": 5,  "username": "BladeRunner",     "score": 6000  },
+      { "rank": 6,  "username": "StormBreaker",    "score": 5100  },
+      { "rank": 7,  "username": "CrimsonBlade",    "score": 4200  },
+      { "rank": 8,  "username": "LightningFang",   "score": 3400  },
+      { "rank": 9,  "username": "DarkMatter",      "score": 2600  },
+      { "rank": 10, "username": "ArcticFox",       "score": 1900  }
+    ]
+  }
+}

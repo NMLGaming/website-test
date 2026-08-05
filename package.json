@@ -1,0 +1,13 @@
+{
+  "name": "vielist-minecraft-leaderboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VIELIST — Minecraft Leaderboard with Vercel serverless backend",
+  "dependencies": {
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
