@@ -1,6 +1,12 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    { "source": "/is7mc", "destination": "/is7mc/index.html" },
+    { "source": "/kingmc", "destination": "/kingmc/index.html" },
+    { "source": "/player", "destination": "/player/index.html" },
+    { "source": "/admin", "destination": "/admin/index.html" }
+  ],
   "headers": [
     {
       "source": "/api/(.*)",
