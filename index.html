@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VIELIST — Minecraft rankings, made legendary</title>
+  <meta name="description" content="VIELIST là trung tâm bảng xếp hạng Minecraft Việt Nam cho IS7MC.NET và KINGMC.VN." />
+  <meta property="og:title" content="VIELIST — Minecraft rankings, made legendary" />
+  <meta property="og:description" content="Theo dõi Top PvP, những thông báo mới nhất và các nhà vô địch server." />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+  <!-- ===== Nav ===== -->
+  <nav>
+    <a class="nav-logo" href="/">VIELIST</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/" class="active"><span class="nav-dot"></span>Home</a></li>
+      <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
+      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
+    </ul>
+    <div class="nav-auth" id="nav-auth"></div>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- ===== Main ===== -->
+  <main class="home-main">
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-pulse"></span> Minecraft competitive network</span>
+        <h1 id="home-title"><span id="home-title-main">Những người chơi</span><br /><span id="home-title-highlight">được nhớ tên.</span></h1>
+        <p class="hero-lead" id="home-hero-lead">VIELIST lưu lại từng cuộc chiến, từng lần lên hạng và những cái tên làm nên lịch sử của cộng đồng Minecraft Việt Nam.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="/is7mc">Khám phá bảng xếp hạng <span aria-hidden="true">↗</span></a>
+          <a class="hero-text-link" href="/player">Tìm một player <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="hero-orbit" aria-hidden="true">
+        <div class="orbit-ring orbit-ring-one"></div>
+        <div class="orbit-ring orbit-ring-two"></div>
+        <div class="hero-sigil" id="hero-logo-mark"><span>V</span></div>
+        <span class="orbit-dot orbit-dot-one"></span>
+        <span class="orbit-dot orbit-dot-two"></span>
+        <span class="orbit-dot orbit-dot-three"></span>
+      </div>
+    </section>
+
+    <section class="server-rail scroll-reveal" aria-label="Các server" data-reveal>
+      <a class="server-tile server-tile-cyan" href="/is7mc">
+        <span class="server-index">01</span>
+        <span class="server-tile-main"><strong>IS7MC.NET</strong><small>Competitive survival</small></span>
+        <span class="server-arrow">↗</span>
+      </a>
+      <a class="server-tile server-tile-violet" href="/kingmc">
+        <span class="server-index">02</span>
+        <span class="server-tile-main"><strong>KINGMC.VN</strong><small>Where legends are crowned</small></span>
+        <span class="server-arrow">↗</span>
+      </a>
+      <div class="live-tile"><span class="live-dot"></span><span><strong>LIVE DATA</strong><small>Cập nhật liên tục</small></span></div>
+    </section>
+
+    <section class="home-intro scroll-reveal" data-reveal>
+      <div class="intro-copy">
+        <span class="section-kicker">THE NETWORK BEHIND THE NAMES</span>
+        <h2 id="home-intro-title">Một mạng lưới dành cho những cái tên đáng nhớ.</h2>
+        <p id="home-intro-body">Theo dõi các server, khám phá những câu chuyện phía sau bảng xếp hạng và cùng xây dựng lịch sử Minecraft Việt Nam.</p>
+      </div>
+      <div class="intro-orbit" aria-hidden="true"><span>V</span><i></i><i></i></div>
+    </section>
+
+    <section class="home-story-grid scroll-reveal" data-reveal>
+      <article class="story-panel story-panel-wide">
+        <span class="story-number">01</span>
+        <div><span class="section-kicker">PLAYER JOURNEYS</span><h2 id="home-story-title">Mỗi trận đấu đều để lại dấu ấn.</h2><p id="home-story-body">Từ khoảnh khắc đầu tiên bước vào server đến ngày được xướng tên, VIELIST biến hành trình của người chơi thành một phần ký ức có thể tìm lại.</p></div>
+      </article>
+      <article class="story-panel story-panel-accent">
+        <span class="story-number">02</span>
+        <div><span class="section-kicker">BUILT TO LAST</span><h3>Thứ hạng hôm nay, lịch sử ngày mai.</h3><p>Dữ liệu được sắp xếp rõ ràng để mỗi cột mốc đều có thể được nhìn lại.</p></div>
+      </article>
+    </section>
+
+    <div class="page-header scroll-reveal" data-reveal>
+      <span class="section-kicker">LATEST FROM THE NETWORK</span>
+      <h2>Thông báo mới nhất</h2>
+      <p>Tin tức mới nhất từ <span class="accent">VIELIST</span> — cập nhật, sự kiện và bảo trì server.</p>
+    </div>
+
+    <!-- Admin: create button (shown only to OWNER via JS) -->
+    <div id="admin-announce-bar" style="display:none; margin-bottom:1.5rem;">
+      <button class="btn btn-primary" id="btn-create-announce">+ Tạo thông báo</button>
+    </div>
+
+    <!-- Modal: create / edit announcement -->
+    <div class="a-modal-overlay" id="ann-modal" style="display:none;">
+      <div class="modal-box" style="max-width:520px;">
+        <h3 id="ann-modal-title">Tạo thông báo</h3>
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
+          <div>
+            <label class="field-lbl">Tiêu đề <span style="color:var(--red)">*</span></label>
+            <input id="ann-title" class="field-input" type="text" maxlength="200" placeholder="Tiêu đề thông báo…" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div>
+              <label class="field-lbl">Loại</label>
+              <select id="ann-type" class="field-input">
+                <option value="news">news</option>
+                <option value="update">update</option>
+                <option value="maintenance">maintenance</option>
+                <option value="event">event</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-lbl">Icon</label>
+              <input id="ann-icon" class="field-input" type="text" maxlength="4" placeholder="📢" />
+            </div>
+          </div>
+          <div>
+            <label class="field-lbl">Ngày <span style="color:var(--red)">*</span></label>
+            <input id="ann-date" class="field-input" type="date" />
+          </div>
+          <div>
+            <label class="field-lbl">Nội dung <span style="color:var(--red)">*</span></label>
+            <textarea id="ann-content" class="field-input" rows="4" maxlength="2000" placeholder="Nội dung thông báo…"></textarea>
+          </div>
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--text-sm);cursor:pointer;">
+            <input type="checkbox" id="ann-pinned" /> Ghim thông báo này
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="ann-modal-cancel">Hủy</button>
+          <button class="btn btn-primary" id="ann-modal-save">Lưu</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="announce-grid scroll-reveal" id="announce-grid" data-reveal>
+      <!-- Rendered by announcements.js -->
+    </div>
+
+    <section class="home-bottom-cta scroll-reveal" data-reveal>
+      <div>
+        <span class="section-kicker">YOUR NAME. YOUR LEGACY.</span>
+        <h2 id="home-cta-title">Không chỉ là một con số.</h2>
+        <p id="home-cta-body">Tra cứu hồ sơ, xem thứ hạng và tìm hiểu câu chuyện phía sau mỗi player.</p>
+      </div>
+      <a class="btn btn-ghost btn-lg" href="/player">Tra cứu player <span aria-hidden="true">→</span></a>
+    </section>
+  </main>
+
+  <!-- ===== Footer ===== -->
+  <footer>
+    <p><strong id="site-footer-text">© 2026 VIELIST — Minecraft Leaderboard</strong> &mdash;
+      <a href="/is7mc">IS7MC.NET</a> &bull; <a href="/kingmc">KINGMC.VN</a>
+    </p>
+  </footer>
+
+  <button id="back-top" title="Lên đầu trang">↑</button>
+  <div id="toast-container"></div>
+
+  <script src="/assets/js/data.js"></script>
+  <script src="/script.js"></script>
+  <script src="/assets/js/site-settings.js"></script>
+  <script src="/assets/js/auth-nav.js"></script>
+  <script src="/assets/js/announcements.js"></script>
+</body>
+</html>
