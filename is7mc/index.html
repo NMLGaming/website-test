@@ -11,16 +11,15 @@
   <!-- ===== Nav ===== -->
   <nav>
     <a class="nav-logo" href="/">VIELIST</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/"><span class="nav-dot"></span>Home</a></li>
+      <li><a href="/is7mc" class="active"><span class="nav-dot"></span>IS7MC</a></li>
+      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
+    </ul>
+    <div class="nav-auth" id="nav-auth"></div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="/"><span class="nav-dot"></span>Home</a></li>
-      <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
-      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
-      <li><a href="/player"><span class="nav-dot"></span>Player</a></li>
-    </ul>
-    <div class="nav-auth" id="nav-auth"></div>
   </nav>
 
   <!-- ===== Main ===== -->
@@ -30,15 +29,30 @@
       <p>Bảng xếp hạng chính thức của server <span class="accent">IS7MC.NET</span>.</p>
     </div>
 
-    <div class="lb-grid">
-      <div class="lb-section">
-        <h2><span class="icon">⚔️</span> TOP PvP</h2>
-        <div id="lb-pvp"><!-- rendered by leaderboard.js --></div>
+    <!-- Tabs -->
+    <div class="lb-tabs">
+      <button class="lb-tab active" data-tab="pvp">⚔️ Top PvP</button>
+      <button class="lb-tab" data-tab="king">👑 King IS7MC</button>
+    </div>
+
+    <!-- Tab: PvP -->
+    <div class="tab-panel active" id="tab-pvp">
+      <div class="lb-search-wrap">
+        <span class="lb-search-icon">🔎</span>
+        <input id="search-pvp" class="lb-search-input" type="text"
+          placeholder="Tìm kiếm player PvP…" autocomplete="off" />
       </div>
-      <div class="lb-section">
-        <h2><span class="icon">👑</span> TOP King</h2>
-        <div id="lb-king"><!-- rendered by leaderboard.js --></div>
+      <div id="board-pvp"></div>
+    </div>
+
+    <!-- Tab: King -->
+    <div class="tab-panel" id="tab-king">
+      <div class="lb-search-wrap">
+        <span class="lb-search-icon">🔎</span>
+        <input id="search-king" class="lb-search-input" type="text"
+          placeholder="Tìm kiếm player King…" autocomplete="off" />
       </div>
+      <div id="board-king"></div>
     </div>
   </main>
 

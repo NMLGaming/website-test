@@ -11,16 +11,15 @@
   <!-- ===== Nav ===== -->
   <nav>
     <a class="nav-logo" href="/">VIELIST</a>
+    <ul class="nav-links" id="nav-links">
+      <li><a href="/" class="active"><span class="nav-dot"></span>Home</a></li>
+      <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
+      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
+    </ul>
+    <div class="nav-auth" id="nav-auth"></div>
     <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
       <span></span><span></span><span></span>
     </button>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="/"><span class="nav-dot"></span>Home</a></li>
-      <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
-      <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
-      <li><a href="/player"><span class="nav-dot"></span>Player</a></li>
-    </ul>
-    <div class="nav-auth" id="nav-auth"></div>
   </nav>
 
   <!-- ===== Main ===== -->
@@ -28,6 +27,54 @@
     <div class="page-header">
       <h1>📣 Thông báo</h1>
       <p>Tin tức mới nhất từ <span class="accent">VIELIST</span> — cập nhật, sự kiện và bảo trì server.</p>
+    </div>
+
+    <!-- Admin: create button (shown only to OWNER via JS) -->
+    <div id="admin-announce-bar" style="display:none; margin-bottom:1.5rem;">
+      <button class="btn btn-primary" id="btn-create-announce">+ Tạo thông báo</button>
+    </div>
+
+    <!-- Modal: create / edit announcement -->
+    <div class="a-modal-overlay" id="ann-modal" style="display:none;">
+      <div class="modal-box" style="max-width:520px;">
+        <h3 id="ann-modal-title">Tạo thông báo</h3>
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
+          <div>
+            <label class="field-lbl">Tiêu đề <span style="color:var(--red)">*</span></label>
+            <input id="ann-title" class="field-input" type="text" maxlength="200" placeholder="Tiêu đề thông báo…" />
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <div>
+              <label class="field-lbl">Loại</label>
+              <select id="ann-type" class="field-input">
+                <option value="news">news</option>
+                <option value="update">update</option>
+                <option value="maintenance">maintenance</option>
+                <option value="event">event</option>
+              </select>
+            </div>
+            <div>
+              <label class="field-lbl">Icon</label>
+              <input id="ann-icon" class="field-input" type="text" maxlength="4" placeholder="📢" />
+            </div>
+          </div>
+          <div>
+            <label class="field-lbl">Ngày <span style="color:var(--red)">*</span></label>
+            <input id="ann-date" class="field-input" type="date" />
+          </div>
+          <div>
+            <label class="field-lbl">Nội dung <span style="color:var(--red)">*</span></label>
+            <textarea id="ann-content" class="field-input" rows="4" maxlength="2000" placeholder="Nội dung thông báo…"></textarea>
+          </div>
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--text-sm);cursor:pointer;">
+            <input type="checkbox" id="ann-pinned" /> Ghim thông báo này
+          </label>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-ghost" id="ann-modal-cancel">Hủy</button>
+          <button class="btn btn-primary" id="ann-modal-save">Lưu</button>
+        </div>
+      </div>
     </div>
 
     <div class="announce-grid" id="announce-grid">
