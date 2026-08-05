@@ -9,11 +9,14 @@
  *   GET  /api/auth/login     — deprecated → 410
  *
  * Env vars bắt buộc:
- *   JWT_SECRET              — chuỗi bí mật bất kỳ (tối thiểu 32 ký tự)
+ *   SESSION_SECRET          — chuỗi bí mật bất kỳ (khuyên dùng tên này)
+ *   JWT_SECRET              — alias của SESSION_SECRET (code chấp nhận cả hai)
  *   DISCORD_CLIENT_ID       — Discord application Client ID
  *   DISCORD_CLIENT_SECRET   — Discord application Client Secret
  *   DISCORD_REDIRECT_URI    — ví dụ: https://your-domain.vercel.app/api/auth/callback
  *   OWNER_DISCORD_ID        — Discord User ID của owner (1223927653455757383)
+ *
+ * Chỉ cần đặt MỘT trong hai: SESSION_SECRET hoặc JWT_SECRET trên Vercel.
  */
 
 'use strict';
@@ -21,7 +24,8 @@
 const jwt    = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const JWT_SECRET      = process.env.JWT_SECRET;
+// Chấp nhận SESSION_SECRET (ưu tiên) hoặc JWT_SECRET
+const JWT_SECRET      = process.env.SESSION_SECRET || process.env.JWT_SECRET;
 const CLIENT_ID       = process.env.DISCORD_CLIENT_ID;
 const CLIENT_SECRET   = process.env.DISCORD_CLIENT_SECRET;
 const REDIRECT_URI    = process.env.DISCORD_REDIRECT_URI;

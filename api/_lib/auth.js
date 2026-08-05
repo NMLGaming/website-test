@@ -9,7 +9,8 @@
 const jwt    = require('jsonwebtoken');
 const crypto = require('crypto');
 
-const JWT_SECRET   = process.env.JWT_SECRET;
+// Chấp nhận SESSION_SECRET (ưu tiên) hoặc JWT_SECRET — chỉ cần đặt một trong hai trên Vercel
+const JWT_SECRET   = process.env.SESSION_SECRET || process.env.JWT_SECRET;
 const COOKIE_NAME  = 'vielist_session';
 const STATE_COOKIE = 'oauth_state';
 const JWT_EXP      = '7d';
@@ -34,7 +35,7 @@ function parseCookies(req) {
 }
 
 function setSessionCookie(res, payload) {
-  if (!JWT_SECRET) throw new Error('JWT_SECRET env var not set');
+  if (!JWT_SECRET) throw new Error('SESSION_SECRET (hoặc JWT_SECRET) chưa được đặt trong Vercel env vars');
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXP });
   res.setHeader('Set-Cookie', [
     COOKIE_NAME + '=' + token +
