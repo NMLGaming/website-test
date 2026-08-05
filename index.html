@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VIELIST — Thông báo</title>
+  <title>VIELIST — Minecraft rankings, made legendary</title>
+  <meta name="description" content="VIELIST là trung tâm bảng xếp hạng Minecraft Việt Nam cho IS7MC.NET và KINGMC.VN." />
+  <meta property="og:title" content="VIELIST — Minecraft rankings, made legendary" />
+  <meta property="og:description" content="Theo dõi Top PvP, những thông báo mới nhất và các nhà vô địch server." />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -23,9 +26,44 @@
   </nav>
 
   <!-- ===== Main ===== -->
-  <main>
+  <main class="home-main">
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="hero-copy">
+        <span class="eyebrow"><span class="eyebrow-pulse"></span> Minecraft competitive network</span>
+        <h1 id="home-title">Những người chơi<br /><span>được nhớ tên.</span></h1>
+        <p class="hero-lead">VIELIST lưu lại từng cuộc chiến, từng lần lên hạng và những cái tên làm nên lịch sử của cộng đồng Minecraft Việt Nam.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="/is7mc">Khám phá bảng xếp hạng <span aria-hidden="true">↗</span></a>
+          <a class="hero-text-link" href="/player">Tìm một player <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="hero-orbit" aria-hidden="true">
+        <div class="orbit-ring orbit-ring-one"></div>
+        <div class="orbit-ring orbit-ring-two"></div>
+        <div class="hero-sigil">V</div>
+        <span class="orbit-dot orbit-dot-one"></span>
+        <span class="orbit-dot orbit-dot-two"></span>
+        <span class="orbit-dot orbit-dot-three"></span>
+      </div>
+    </section>
+
+    <section class="server-rail" aria-label="Các server">
+      <a class="server-tile server-tile-cyan" href="/is7mc">
+        <span class="server-index">01</span>
+        <span class="server-tile-main"><strong>IS7MC.NET</strong><small>Competitive survival</small></span>
+        <span class="server-arrow">↗</span>
+      </a>
+      <a class="server-tile server-tile-violet" href="/kingmc">
+        <span class="server-index">02</span>
+        <span class="server-tile-main"><strong>KINGMC.VN</strong><small>Where legends are crowned</small></span>
+        <span class="server-arrow">↗</span>
+      </a>
+      <div class="live-tile"><span class="live-dot"></span><span><strong>LIVE DATA</strong><small>Cập nhật liên tục</small></span></div>
+    </section>
+
     <div class="page-header">
-      <h1>📣 Thông báo</h1>
+      <span class="section-kicker">LATEST FROM THE NETWORK</span>
+      <h2>Thông báo mới nhất</h2>
       <p>Tin tức mới nhất từ <span class="accent">VIELIST</span> — cập nhật, sự kiện và bảo trì server.</p>
     </div>
 
@@ -80,6 +118,15 @@
     <div class="announce-grid" id="announce-grid">
       <!-- Rendered by announcements.js -->
     </div>
+
+    <section class="home-bottom-cta">
+      <div>
+        <span class="section-kicker">YOUR NAME. YOUR LEGACY.</span>
+        <h2>Không chỉ là một con số.</h2>
+        <p>Tra cứu hồ sơ, xem thứ hạng và tìm hiểu câu chuyện phía sau mỗi player.</p>
+      </div>
+      <a class="btn btn-ghost btn-lg" href="/player">Tra cứu player <span aria-hidden="true">→</span></a>
+    </section>
   </main>
 
   <!-- ===== Footer ===== -->

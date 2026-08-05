@@ -3,6 +3,12 @@
 Website quản lý bảng xếp hạng Minecraft với đăng nhập Discord OAuth2 và admin panel đầy đủ.
 HTML/CSS/JS thuần + Vercel Serverless Functions + PostgreSQL backend.
 
+## Giao diện
+
+Bản hiện tại dùng giao diện dark glassmorphism với Home hub, server cards, live data rail,
+leaderboard responsive và trang KINGMC có khu vực “Current King” riêng. Code vẫn là HTML/CSS/JS
+thuần để có thể upload trực tiếp lên GitHub và deploy trên Vercel, không cần build step.
+
 ## Cấu trúc project
 
 ```
@@ -184,7 +190,7 @@ Tạo `.env.local`:
 DISCORD_CLIENT_ID=your_client_id
 DISCORD_CLIENT_SECRET=your_client_secret
 DISCORD_REDIRECT_URI=http://localhost:3000/api/auth/callback
-OWNER_DISCORD_ID=your_discord_user_id
+OWNER_DISCORD_ID=1223927653455757383
 JWT_SECRET=dev-secret-min-32-chars-change-this
 DATABASE_URL=postgresql://...
 ```
@@ -210,6 +216,24 @@ Sau khi đăng nhập:
 | KINGMC | Giống IS7MC |
 | Players | Quản lý danh sách player toàn cục |
 | Settings | Đổi logo, banner, tên web, màu, footer, hiệu ứng |
+
+Quyền Owner được kiểm tra ở server-side qua `OWNER_DISCORD_ID`. Người đã đăng nhập nhưng
+không phải Owner sẽ nhận `403 Forbidden` khi truy cập Admin API và màn hình Admin không được mở.
+
+## Deploy nhanh lên Vercel
+
+1. Giải nén file ZIP và upload **nội dung bên trong thư mục `vielist2`** lên một repository GitHub mới.
+2. Vào Vercel → **Add New Project** → chọn repository → giữ Framework là **Other**.
+3. Không cần Build Command và Output Directory; Vercel sẽ phục vụ các file HTML tĩnh và thư mục `api/`.
+4. Thêm các Environment Variables: `SESSION_SECRET`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`,
+   `DISCORD_REDIRECT_URI`, `OWNER_DISCORD_ID`, và `DATABASE_URL` nếu dùng PostgreSQL.
+5. Sau khi deploy, thêm chính xác URL
+   `https://<domain-cua-ban>/api/auth/callback` vào Discord Developer Portal → OAuth2 → Redirects.
+
+Nếu chưa nối database, website vẫn chạy chế độ demo với dữ liệu trong `assets/data/`.
+File `.env.example` chỉ là mẫu an toàn. Không commit secret thật vào GitHub; `.gitignore`
+đã chặn các file `.env` khỏi repository. Nếu đổi domain Vercel, nhớ cập nhật đồng thời
+`DISCORD_REDIRECT_URI` trên Vercel và Redirect URI trong Discord Developer Portal.
 
 ## Chế độ Demo (không có DB)
 

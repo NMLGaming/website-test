@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>KINGMC.VN — VIELIST Leaderboard</title>
+  <title>KINGMC.VN — The Crown | VIELIST</title>
+  <meta name="description" content="KINGMC.VN — nơi một người duy nhất đội vương miện và những chiến binh cạnh tranh trên Top PvP." />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
@@ -23,37 +24,36 @@
   </nav>
 
   <!-- ===== Main ===== -->
-  <main>
+  <main class="king-page">
     <div class="page-header">
-      <h1>🏰 KINGMC.VN</h1>
-      <p>Bảng xếp hạng chính thức của server <span class="accent">KINGMC.VN</span>.</p>
+      <span class="section-kicker">THE ROYAL SERVER</span>
+      <h1>KINGMC<span class="accent">.VN</span></h1>
+      <p>Nơi một cái tên duy nhất đứng trên ngai vàng — và mọi chiến binh đều đang tiến về phía đó.</p>
     </div>
 
-    <!-- Tabs -->
-    <div class="lb-tabs">
-      <button class="lb-tab active" data-tab="pvp">⚔️ Top PvP</button>
-      <button class="lb-tab" data-tab="king">👑 King KINGMC</button>
-    </div>
-
-    <!-- Tab: PvP -->
-    <div class="tab-panel active" id="tab-pvp">
-      <div class="lb-search-wrap">
-        <span class="lb-search-icon">🔎</span>
-        <input id="search-pvp" class="lb-search-input" type="text"
-          placeholder="Tìm kiếm player PvP…" autocomplete="off" />
+    <section class="king-crown glass-card" id="king-crown">
+      <div class="crown-ambient"></div>
+      <div class="crown-copy">
+        <span class="section-kicker crown-kicker">THE CURRENT KING</span>
+        <h2 id="king-name">Đang tìm nhà vua…</h2>
+        <p>Người đang nắm giữ ngai vàng của KINGMC.VN.</p>
+        <div class="crown-meta"><span>VƯƠNG QUỐC KINGMC</span><span class="crown-divider"></span><span id="king-score">—</span></div>
       </div>
-      <div id="board-pvp"></div>
-    </div>
-
-    <!-- Tab: King -->
-    <div class="tab-panel" id="tab-king">
-      <div class="lb-search-wrap">
-        <span class="lb-search-icon">🔎</span>
-        <input id="search-king" class="lb-search-input" type="text"
-          placeholder="Tìm kiếm player King…" autocomplete="off" />
+      <div class="crown-avatar-frame">
+        <div class="crown-glow"></div>
+        <img id="king-avatar" src="" alt="" />
       </div>
-      <div id="board-king"></div>
+      <div class="crown-mark">KING</div>
+    </section>
+
+    <div class="lb-section-heading">
+      <div><span class="section-kicker">THE BATTLEFIELD</span><h2>Top PvP</h2></div>
+      <div class="lb-search-wrap">
+        <span class="lb-search-icon" aria-hidden="true">⌕</span>
+        <input id="search-pvp" class="lb-search-input" type="text" placeholder="Tìm kiếm player…" autocomplete="off" />
+      </div>
     </div>
+    <div class="tab-panel active" id="tab-pvp"><div id="board-pvp"></div></div>
   </main>
 
   <footer>

@@ -168,7 +168,7 @@ function showAdminShell(user) {
   var avatar = user.avatar
     ? '<img src="' + esc(user.avatar) + '" class="nav-avatar" style="width:28px;height:28px;border-radius:50%;margin-right:6px" onerror="this.remove()">'
     : '';
-  topbar.innerHTML = avatar + '<span class="a-username-badge">👑 ' + esc(user.username) + '</span>';
+  topbar.innerHTML = avatar + '<span class="a-username-badge">' + esc(user.username) + ' · OWNER</span>';
 }
 
 function setupLogout() {

@@ -17,6 +17,7 @@
   var pvpWrap  = document.getElementById('tab-pvp');
   var kingWrap = document.getElementById('tab-king');
   if (!pvpWrap && !kingWrap) return; // old layout, skip
+  var isRoyalPage = server === 'kingmc' && document.getElementById('king-crown');
 
   /* ── render skeleton ── */
   var skHtml = buildSkeleton();
@@ -32,10 +33,11 @@
 
     if (pvpBoard)  pvpBoard.innerHTML  = pvp.length  ? buildBoard(pvp,  'Điểm PvP')  : emptyState();
     if (kingBoard) kingBoard.innerHTML = king.length ? buildBoard(king, 'Điểm King') : emptyState();
+    if (isRoyalPage) renderCrown(king[0]);
 
     /* enable search */
     enableSearch('search-pvp',  pvpBoard,  pvp,  'Điểm PvP');
-    enableSearch('search-king', kingBoard, king, 'Điểm King');
+    if (!isRoyalPage) enableSearch('search-king', kingBoard, king, 'Điểm King');
 
   }).catch(function (e) {
     var errHtml = '<div class="empty-state"><div class="icon">⚠️</div><h3>Lỗi tải dữ liệu</h3><p>' + esc(e.message) + '</p></div>';
@@ -122,6 +124,17 @@
       '</div>';
     }
     return '<div class="lb-board">' + rows + '</div>';
+  }
+
+  function renderCrown(king) {
+    var nameEl = document.getElementById('king-name');
+    var scoreEl = document.getElementById('king-score');
+    var avatarEl = document.getElementById('king-avatar');
+    if (!nameEl || !king) return;
+    nameEl.textContent = king.username || 'Chưa có nhà vua';
+    scoreEl.textContent = Number(king.score || 0).toLocaleString('vi-VN') + ' KING POINTS';
+    avatarEl.src = API.getAvatarUrl(king.username);
+    avatarEl.onerror = function () { this.src = API.getFallbackAvatar(); };
   }
 
   function esc(s) {
