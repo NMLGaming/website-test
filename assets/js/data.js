@@ -19,6 +19,22 @@ const API = (function () {
     return Array.isArray(payload) ? payload : (payload.data || []);
   }
 
+  async function getAnnouncementComments(id) {
+    const res = await fetch('/api/auth/data?resource=announcement-comments&announcement_id=' + encodeURIComponent(id), { credentials: 'include' });
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.error || 'Không thể tải bình luận');
+    return payload.data || [];
+  }
+
+  async function addAnnouncementComment(id, content) {
+    const res = await fetch('/api/auth/data?resource=announcement-comments&announcement_id=' + encodeURIComponent(id), {
+      method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content: content })
+    });
+    const payload = await res.json();
+    if (!res.ok) throw new Error(payload.error || 'Không thể gửi bình luận');
+    return payload;
+  }
+
   // ---- Leaderboard ----
 
   async function getLeaderboard(server) {
@@ -40,5 +56,5 @@ const API = (function () {
     return 'https://crafatar.com/avatars/MHF_Steve?size=64&overlay=true';
   }
 
-  return { getAnnouncements, getLeaderboard, getAvatarUrl, getFallbackAvatar };
+  return { getAnnouncements, getAnnouncementComments, addAnnouncementComment, getLeaderboard, getAvatarUrl, getFallbackAvatar };
 })();

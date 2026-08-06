@@ -16,13 +16,35 @@ CREATE TABLE IF NOT EXISTS announcements (
   content      TEXT        NOT NULL,
   date         TEXT        NOT NULL,                     -- YYYY-MM-DD display date
   pinned       BOOLEAN     NOT NULL DEFAULT false,
+  author_username TEXT     NOT NULL DEFAULT 'VIELIST Admin',
+  author_avatar TEXT       NOT NULL DEFAULT '',
+  author_role   TEXT        NOT NULL DEFAULT 'Admin',
+  border_color  TEXT        NOT NULL DEFAULT '#00d4ff',
+  background_color TEXT    NOT NULL DEFAULT '#101827',
+  accent_color TEXT         NOT NULL DEFAULT '#00d4ff',
   scheduled_at TIMESTAMPTZ,                              -- NULL = publish immediately
   created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_username TEXT NOT NULL DEFAULT 'VIELIST Admin';
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_avatar TEXT NOT NULL DEFAULT '';
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_role TEXT NOT NULL DEFAULT 'Admin';
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS border_color TEXT NOT NULL DEFAULT '#00d4ff';
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS background_color TEXT NOT NULL DEFAULT '#101827';
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS accent_color TEXT NOT NULL DEFAULT '#00d4ff';
+
 CREATE INDEX IF NOT EXISTS idx_announcements_date   ON announcements (date DESC);
 CREATE INDEX IF NOT EXISTS idx_announcements_pinned ON announcements (pinned DESC);
+
+CREATE TABLE IF NOT EXISTS announcement_comments (
+  id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  announcement_id TEXT NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
+  username        TEXT NOT NULL,
+  avatar          TEXT NOT NULL DEFAULT '',
+  content         TEXT NOT NULL,
+  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 -- ============================================================
 -- Leaderboard (supports unlimited servers & categories)
@@ -67,6 +89,8 @@ INSERT INTO settings (key, value) VALUES
   ('cta_title',       'Không chỉ là một con số.'),
   ('cta_body',        'Khám phá những nhà vua và các thông báo mới nhất của VIELIST.'),
   ('footer_text',     '© 2026 VIELIST — Minecraft Leaderboard'),
+  ('discord_link',    'https://discord.com'),
+  ('join_discord_enabled', 'true'),
   ('primary_color',   '#00d4ff'),
   ('effects_enabled', 'true')
 ON CONFLICT (key) DO NOTHING;

@@ -273,12 +273,23 @@ const Announcements = {
       var labels = { news:'📢 Tin tức', update:'🚀 Update', maintenance:'🔧 Bảo trì', event:'⚡ Sự kiện' };
       return '<option value="' + t + '"' + (a.type === t ? ' selected' : '') + '>' + labels[t] + '</option>';
     }).join('');
+    var content = a.content || '';
     return '<div class="form-group"><label>Loại</label><select name="type">' + opts + '</select></div>' +
-      '<div class="form-group"><label>Icon (emoji)</label><input name="icon" value="' + esc(a.icon||'📢') + '" maxlength="4"/></div>' +
+      '<div class="form-group"><label>Icon / ký hiệu</label><input name="icon" value="' + esc(a.icon||'•') + '" maxlength="8"/></div>' +
       '<div class="form-group"><label>Tiêu đề *</label><input name="title" value="' + esc(a.title||'') + '" required placeholder="Tiêu đề thông báo…"/></div>' +
       '<div class="form-group"><label>Ngày đăng *</label><input type="date" name="date" value="' + esc(a.date||today) + '" required/></div>' +
       '<div class="form-group"><label>Đặt lịch (để trống = đăng ngay)</label><input type="datetime-local" name="scheduled_at" value="' + esc(a.scheduled_at||'') + '"/></div>' +
-      '<div class="form-group"><label>Nội dung *</label><textarea name="content" required rows="4" placeholder="Nội dung chi tiết…">' + esc(a.content||'') + '</textarea></div>' +
+      '<div class="form-group"><label>Nội dung *</label>' +
+        '<div class="rich-editor-toolbar" role="toolbar" aria-label="Định dạng nội dung">' +
+          '<button type="button" data-editor-command="bold"><b>B</b></button><button type="button" data-editor-command="italic"><i>I</i></button><button type="button" data-editor-command="underline"><u>U</u></button>' +
+          '<button type="button" data-editor-command="formatBlock" data-editor-value="h2">H</button><button type="button" data-editor-command="insertUnorderedList">• List</button><button type="button" data-editor-command="formatBlock" data-editor-value="blockquote">Quote</button><button type="button" data-editor-command="formatBlock" data-editor-value="pre">Code</button>' +
+          '<button type="button" data-editor-action="color">Màu</button><button type="button" data-editor-action="link">Link</button><button type="button" data-editor-action="emoji">Emoji</button><button type="button" data-editor-action="image">Ảnh/GIF</button><button type="button" data-editor-action="youtube">YouTube</button><button type="button" data-editor-action="table">Bảng</button>' +
+        '</div>' +
+        '<div class="rich-editor" id="announcement-editor" contenteditable="true" data-placeholder="Viết thông báo không giới hạn ký tự…">' + content + '</div>' +
+        '<textarea name="content" id="announcement-content-value" required hidden></textarea>' +
+        '<small class="form-hint">Bôi đen chữ rồi chọn Link hoặc Màu để áp dụng riêng cho phần đã chọn.</small>' +
+      '</div>' +
+      '<div class="announcement-color-grid"><div class="form-group"><label>Viền bài đăng</label><input type="color" name="border_color" value="' + esc(a.border_color||'#00d4ff') + '"/></div><div class="form-group"><label>Màu nền</label><input type="color" name="background_color" value="' + esc(a.background_color||'#101827') + '"/></div><div class="form-group"><label>Màu accent</label><input type="color" name="accent_color" value="' + esc(a.accent_color||'#00d4ff') + '"/></div></div>' +
       '<div class="form-group"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer">' +
         '<input type="checkbox" name="pinned"' + (a.pinned ? ' checked' : '') + ' style="width:auto"/> 📌 Ghim thông báo này lên đầu' +
       '</label></div>';
@@ -287,6 +298,7 @@ const Announcements = {
   create() {
     var self = this;
     Modal.show('➕ Đăng thông báo mới', self._form(), async function () {
+      syncAnnouncementEditor();
       var f = getFormData('a-modal-body');
       if (!f.title || !f.content || !f.date) throw new Error('Điền đủ các trường bắt buộc (*)');
       f.pinned = document.querySelector('#a-modal-body [name=pinned]').checked;
@@ -295,6 +307,7 @@ const Announcements = {
       toast('Đã đăng thông báo!');
       await self.load();
     });
+    setTimeout(setupAnnouncementEditor, 0);
   },
 
   edit(id) {
@@ -302,6 +315,7 @@ const Announcements = {
     var item = self.data.find(function (a) { return a.id === id; });
     if (!item) return;
     Modal.show('✏️ Sửa thông báo', self._form(item), async function () {
+      syncAnnouncementEditor();
       var f = getFormData('a-modal-body');
       if (!f.title || !f.content || !f.date) throw new Error('Điền đủ các trường bắt buộc (*)');
       f.pinned = document.querySelector('#a-modal-body [name=pinned]').checked;
@@ -310,6 +324,7 @@ const Announcements = {
       toast('Đã cập nhật thông báo.');
       await self.load();
     });
+    setTimeout(setupAnnouncementEditor, 0);
   },
 
   async del(id) {
@@ -320,6 +335,50 @@ const Announcements = {
     catch (e) { toast(e.message, 'error'); }
   }
 };
+
+function syncAnnouncementEditor() {
+  var editor = document.getElementById('announcement-editor');
+  var value = document.getElementById('announcement-content-value');
+  if (editor && value) value.value = editor.innerHTML.trim();
+}
+
+function setupAnnouncementEditor() {
+  var editor = document.getElementById('announcement-editor');
+  if (!editor || editor.dataset.ready) return;
+  editor.dataset.ready = 'true';
+  editor.closest('.form-group').querySelectorAll('[data-editor-command]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      editor.focus();
+      var command = button.dataset.editorCommand;
+      if (command === 'formatBlock') document.execCommand(command, false, button.dataset.editorValue);
+      else document.execCommand(command, false, null);
+    });
+  });
+  editor.closest('.form-group').querySelectorAll('[data-editor-action]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      editor.focus();
+      var action = button.dataset.editorAction;
+      if (action === 'color') {
+        var color = prompt('Nhập mã màu HEX', '#00d4ff');
+        if (/^#[0-9a-f]{6}$/i.test(color || '')) document.execCommand('foreColor', false, color);
+      } else if (action === 'link') {
+        var url = prompt('Nhập URL (https://...)', 'https://');
+        if (url && /^https?:\/\//i.test(url)) document.execCommand('createLink', false, url);
+      } else if (action === 'emoji') {
+        document.execCommand('insertText', false, prompt('Nhập emoji hoặc ký hiệu', '✦') || '');
+      } else if (action === 'image') {
+        var src = prompt('Nhập URL ảnh hoặc GIF', 'https://');
+        if (src && /^https?:\/\//i.test(src)) document.execCommand('insertHTML', false, '<img src="' + src.replace(/"/g, '&quot;') + '" alt="">');
+      } else if (action === 'youtube') {
+        var video = prompt('Nhập URL YouTube', 'https://www.youtube.com/watch?v=');
+        var match = (video || '').match(/(?:v=|youtu\.be\/)([A-Za-z0-9_-]{6,})/);
+        if (match) document.execCommand('insertHTML', false, '<iframe src="https://www.youtube-nocookie.com/embed/' + match[1] + '" title="YouTube video" loading="lazy" allowfullscreen></iframe>');
+      } else if (action === 'table') {
+        document.execCommand('insertHTML', false, '<table><tbody><tr><td>Ô 1</td><td>Ô 2</td></tr><tr><td>Ô 3</td><td>Ô 4</td></tr></tbody></table><p><br></p>');
+      }
+    });
+  });
+}
 
 /* ============================================================
    King leaderboard CRUD (IS7MC & KINGMC)
@@ -430,9 +489,9 @@ const Settings = {
       '<div class="settings-grid">' +
       '<div class="glass-card settings-card">' +
         '<div class="settings-card-heading"><div><span class="section-kicker">BRAND ASSETS</span><h2>Logo & hình ảnh</h2></div><span class="settings-note">Tối đa 1.5MB / ảnh</span></div>' +
-        '<div class="upload-row"><div class="upload-copy"><label>Logo chữ V ở Home</label><small>Ảnh sẽ nằm trong vòng tròn phát sáng.</small></div><div class="upload-control"><input type="file" id="cfg-hero-logo-file" accept="image/*"/><img id="cfg-hero-logo-preview" class="upload-preview upload-preview-mark" src="' + esc(s.hero_logo_url||'') + '" alt=""/></div></div>' +
-        '<div class="upload-row"><div class="upload-copy"><label>Logo trên thanh menu</label><small>PNG nền trong suốt sẽ đẹp nhất.</small></div><div class="upload-control"><input type="file" id="cfg-logo-file" accept="image/*"/><img id="cfg-logo-preview" class="upload-preview" src="' + esc(s.logo_url||'') + '" alt=""/></div></div>' +
-        '<div class="upload-row"><div class="upload-copy"><label>Avatar tuỳ chỉnh</label><small>Tự động bo tròn và có hiệu ứng khi di chuột.</small></div><div class="upload-control"><input type="file" id="cfg-avatar-file" accept="image/*"/><img id="cfg-avatar-preview" class="upload-preview upload-preview-avatar" src="' + esc(s.avatar_url||'') + '" alt=""/></div></div>' +
+        '<div class="upload-row"><div class="upload-copy"><label>Logo chữ V ở Home</label><small>Ảnh sẽ nằm trong vòng tròn phát sáng.</small></div><div class="upload-control"><input type="file" id="cfg-hero-logo-file" accept="image/*"/><img id="cfg-hero-logo-preview" class="upload-preview upload-preview-mark" src="' + esc(s.hero_logo_url||'') + '" alt=""/><button type="button" class="btn btn-danger btn-sm cfg-delete-image" data-input="cfg-hero-logo-file" data-preview="cfg-hero-logo-preview">Xóa</button></div></div>' +
+        '<div class="upload-row"><div class="upload-copy"><label>Logo trên thanh menu</label><small>PNG nền trong suốt sẽ đẹp nhất.</small></div><div class="upload-control"><input type="file" id="cfg-logo-file" accept="image/*"/><img id="cfg-logo-preview" class="upload-preview" src="' + esc(s.logo_url||'') + '" alt=""/><button type="button" class="btn btn-danger btn-sm cfg-delete-image" data-input="cfg-logo-file" data-preview="cfg-logo-preview">Xóa</button></div></div>' +
+        '<div class="upload-row"><div class="upload-copy"><label>Avatar tuỳ chỉnh</label><small>Tự động bo tròn và có hiệu ứng khi di chuột.</small></div><div class="upload-control"><input type="file" id="cfg-avatar-file" accept="image/*"/><img id="cfg-avatar-preview" class="upload-preview upload-preview-avatar" src="' + esc(s.avatar_url||'') + '" alt=""/><button type="button" class="btn btn-danger btn-sm cfg-delete-image" data-input="cfg-avatar-file" data-preview="cfg-avatar-preview">Xóa</button></div></div>' +
         '<div class="form-group"><label>Ảnh nền Hero (URL)</label><input id="cfg-banner" value="' + esc(s.hero_banner_url||'') + '" placeholder="https://…"/></div>' +
       '</div>' +
       '<div class="glass-card settings-card">' +
@@ -449,6 +508,8 @@ const Settings = {
         '<div class="form-group"><label>Tiêu đề cuối trang</label><input id="cfg-cta-title" value="' + esc(s.cta_title||'') + '"/></div>' +
         '<div class="form-group"><label>Nội dung cuối trang</label><textarea id="cfg-cta-body" rows="3">' + esc(s.cta_body||'') + '</textarea></div>' +
         '<div class="form-group"><label>Text Footer</label><input id="cfg-footer" value="' + esc(s.footer_text||'') + '"/></div>' +
+        '<div class="form-group"><label>Link Discord</label><input id="cfg-discord-link" type="url" value="' + esc(s.discord_link||'https://discord.com') + '" placeholder="https://discord.gg/..."/></div>' +
+        '<div class="form-group"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="cfg-join-discord"' + (s.join_discord_enabled !== 'false' ? ' checked' : '') + ' style="width:auto"/> Hiển thị lời mời tham gia Discord trong profile</label></div>' +
       '</div>' +
       '<div class="glass-card settings-card settings-card-compact">' +
         '<div class="settings-card-heading"><div><span class="section-kicker">APPEARANCE</span><h2>Màu & hiệu ứng</h2></div></div>' +
@@ -475,7 +536,16 @@ const Settings = {
           var preview = document.getElementById('cfg-' + name + '-preview');
           if (preview) { preview.src = data; preview.classList.add('has-preview'); }
           input.dataset.value = data;
+          input.dataset.deleted = '';
         }).catch(function () { toast('Không đọc được ảnh này.', 'error'); });
+      });
+    });
+    document.querySelectorAll('.cfg-delete-image').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var input = document.getElementById(button.dataset.input);
+        var preview = document.getElementById(button.dataset.preview);
+        if (input) { input.value = ''; input.dataset.value = ''; input.dataset.deleted = 'true'; }
+        if (preview) { preview.removeAttribute('src'); preview.classList.remove('has-preview'); preview.style.display = 'none'; }
       });
     });
     document.getElementById('cfg-color').addEventListener('input', function () {
@@ -487,6 +557,7 @@ const Settings = {
     try {
       var readUpload = function (id, fallback) {
         var input = document.getElementById(id);
+        if (input && input.dataset.deleted === 'true') return '';
         return input && input.dataset.value ? input.dataset.value : fallback;
       };
       await AdminAPI.updateSettings({
@@ -506,6 +577,8 @@ const Settings = {
         cta_title:       document.getElementById('cfg-cta-title').value.trim(),
         cta_body:        document.getElementById('cfg-cta-body').value.trim(),
         footer_text:     document.getElementById('cfg-footer').value.trim(),
+        discord_link:    document.getElementById('cfg-discord-link').value.trim(),
+        join_discord_enabled: document.getElementById('cfg-join-discord').checked ? 'true' : 'false',
         primary_color:   document.getElementById('cfg-color').value,
         effects_enabled: document.getElementById('cfg-effects').checked ? 'true' : 'false',
       });

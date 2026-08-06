@@ -1,249 +1,113 @@
 /**
- * announcements.js — Renders announcement cards on the Home page.
- * Admins (OWNER role) get inline Create / Edit / Delete controls.
+ * Public announcement renderer.
+ * The editor lives in Admin; this page is intentionally read-only for visitors.
  */
-
 (function () {
   'use strict';
+  var grid = document.getElementById('announce-grid');
+  if (!grid || typeof API === 'undefined') return;
+  var count = document.getElementById('announcement-count');
 
-  var grid    = document.getElementById('announce-grid');
-  var adminBar = document.getElementById('admin-announce-bar');
-  var btnCreate = document.getElementById('btn-create-announce');
-  var annModal  = document.getElementById('ann-modal');
-  var annCancel = document.getElementById('ann-modal-cancel');
-  var annSave   = document.getElementById('ann-modal-save');
-
-  if (!grid) return;
-
-  var currentItems = [];
-  var editingId    = null;   // null = creating, string = editing
-
-  /* ── skeleton ── */
-  grid.innerHTML = [1,2,3].map(function () {
-    return '<div class="glass-card skeleton-card">' +
-      '<div class="sk sk-title" style="height:18px;margin-bottom:10px;width:60%;"></div>' +
-      '<div class="sk sk-line" style="height:13px;margin-bottom:6px;"></div>' +
-      '<div class="sk sk-line" style="height:13px;width:80%;"></div>' +
-    '</div>';
+  grid.innerHTML = [1, 2, 3].map(function () {
+    return '<div class="glass-card skeleton-card"><div class="sk sk-title"></div><div class="sk sk-line"></div><div class="sk sk-line sk-line-sm"></div></div>';
   }).join('');
 
-  /* ── fetch announcements ── */
-  function loadAnnouncements() {
-    API.getAnnouncements().then(function (items) {
-      currentItems = items || [];
-      render();
-    }).catch(function (e) {
-      grid.innerHTML =
-        '<div class="empty-state"><div class="icon">⚠️</div>' +
-        '<h3>Không thể tải thông báo</h3><p>Vui lòng thử lại sau.</p></div>';
-    });
-  }
-
-  loadAnnouncements();
-
-  /* ── check auth: show admin controls if OWNER ── */
-  (function pollAuth() {
-    fetch('/api/auth/me', { credentials: 'include' })
-      .then(function (r) {
-        return r.text().then(function (raw) {
-          var data = {};
-          try { data = raw ? JSON.parse(raw) : {}; } catch (_) {}
-          if (!r.ok) throw new Error(data.error || raw || ('HTTP ' + r.status));
-          return data;
-        });
-      })
-      .then(function (d) {
-        if (d && d.authenticated && d.role === 'OWNER') {
-          if (adminBar) adminBar.style.display = 'block';
-        }
-      })
-      .catch(function () {});
-  })();
-
-  /* ── render all cards ── */
-  function render() {
-    if (!currentItems.length) {
-      grid.innerHTML =
-        '<div class="empty-state"><div class="icon">📭</div>' +
-        '<h3>Chưa có thông báo</h3><p>Quay lại sau nhé!</p></div>';
-      return;
-    }
-    grid.innerHTML = currentItems.map(function (item) {
-      return renderCard(item);
-    }).join('');
-
-    /* attach admin button events */
-    grid.querySelectorAll('.ann-edit-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var id = btn.dataset.id;
-        var item = currentItems.find(function (x) { return String(x.id) === id; });
-        if (item) openModal(item);
-      });
-    });
-    grid.querySelectorAll('.ann-delete-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var id = btn.dataset.id;
-        if (!confirm('Xoá thông báo này?')) return;
-        deleteAnnouncement(id);
-      });
-    });
-    grid.querySelectorAll('.ann-pin-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        var id  = btn.dataset.id;
-        var item = currentItems.find(function (x) { return String(x.id) === id; });
-        if (item) togglePin(item);
-      });
-    });
-  }
+  API.getAnnouncements().then(function (items) {
+    items = items || [];
+    if (count) count.textContent = items.length + ' bài đăng trong kho lưu trữ';
+    grid.innerHTML = items.length ? items.map(renderCard).join('') :
+      '<div class="empty-state"><div class="empty-mark">—</div><h3>Chưa có thông báo</h3><p>Quay lại sau nhé.</p></div>';
+    bindComments();
+  }).catch(function (error) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-mark">!</div><h3>Không thể tải thông báo</h3><p>' + esc(error.message) + '</p></div>';
+  });
 
   function renderCard(item) {
-    var type   = item.type || 'news';
-    var icon   = item.icon || (type === 'update' ? '🔧' : type === 'maintenance' ? '⚙️' : type === 'event' ? '🎉' : '📢');
-    var pinned = item.pinned ? '<span class="ann-pin-flag">📌 Ghim</span>' : '';
-    var badge  = '<span class="announce-badge badge-' + esc(type) + '">' + esc(type) + '</span>';
-    var adminBtns = (adminBar && adminBar.style.display !== 'none')
-      ? '<div class="ann-admin-actions">' +
-          '<button class="ann-pin-btn btn-icon" data-id="' + item.id + '" title="' + (item.pinned ? 'Bỏ ghim' : 'Ghim') + '">' + (item.pinned ? '📌' : '📍') + '</button>' +
-          '<button class="ann-edit-btn btn-icon" data-id="' + item.id + '" title="Sửa">✏️</button>' +
-          '<button class="ann-delete-btn btn-icon btn-icon-danger" data-id="' + item.id + '" title="Xoá">🗑️</button>' +
-        '</div>'
-      : '';
-
-    return '<div class="glass-card announce-card' + (item.pinned ? ' pinned-card' : '') + '">' +
-      '<div class="announce-header">' +
-        '<div class="announce-title-row">' +
-          '<span class="announce-icon">' + esc(icon) + '</span>' +
-          '<div class="announce-meta">' +
-            '<div class="title">' + esc(item.title) + '</div>' +
-            '<div class="date">' + esc(item.date || '') + ' ' + pinned + ' ' + badge + '</div>' +
-          '</div>' +
-        '</div>' +
-        adminBtns +
-      '</div>' +
-      '<div class="announce-content">' + esc(item.content) + '</div>' +
-    '</div>';
+    var author = item.author || {};
+    var border = safeColor(item.border_color, '#00d4ff');
+    var background = safeColor(item.background_color, '#101827');
+    var accent = safeColor(item.accent_color, '#00d4ff');
+    var avatar = author.avatar && /^(https?:\/\/|\/|data:image\/)/i.test(author.avatar)
+      ? '<img class="announce-author-avatar" src="' + esc(author.avatar) + '" alt="">'
+      : '<span class="announce-author-avatar announce-author-fallback">' + esc((author.username || 'A').charAt(0).toUpperCase()) + '</span>';
+    return '<article class="glass-card announce-card announce-card-rich" style="--announce-border:' + border + ';--announce-bg:' + background + ';--announce-accent:' + accent + '">' +
+      '<header class="announce-card-header">' +
+        '<div class="announce-author">' + avatar + '<div><strong>' + esc(author.username || 'VIELIST Admin') + '</strong><span>' + esc(author.role || 'Admin') + '</span></div></div>' +
+        '<time datetime="' + esc(item.date || '') + '">' + esc(formatDate(item.date)) + '</time>' +
+      '</header>' +
+      '<div class="announce-card-title-row"><span class="announce-type-mark">' + esc(item.icon || '•') + '</span><div><span class="announce-badge badge-' + esc(item.type || 'news') + '">' + esc(typeLabel(item.type)) + '</span><h2>' + esc(item.title || '') + '</h2></div></div>' +
+      '<div class="announce-rich-content">' + sanitizeHtml(item.content || '') + '</div>' +
+      '<footer class="announce-card-footer"><span class="announce-accent-line"></span><button class="comment-toggle" data-id="' + esc(item.id) + '">Bình luận <span class="comment-count" data-count-for="' + esc(item.id) + '">0</span></button></footer>' +
+      '<div class="comment-panel" data-comments-for="' + esc(item.id) + '" hidden><div class="comment-list"></div><form class="comment-form" data-id="' + esc(item.id) + '"><input name="content" maxlength="2000" placeholder="Viết bình luận…" required><button class="btn btn-primary btn-sm" type="submit">Gửi</button></form><p class="comment-login-note">Bạn cần đăng nhập Discord để bình luận.</p></div>' +
+    '</article>';
   }
 
-  /* ── Modal helpers ── */
-  function openModal(item) {
-    editingId = item ? item.id : null;
-    document.getElementById('ann-modal-title').textContent = item ? 'Sửa thông báo' : 'Tạo thông báo';
-    document.getElementById('ann-title').value   = item ? item.title   : '';
-    document.getElementById('ann-content').value = item ? item.content : '';
-    document.getElementById('ann-type').value    = item ? (item.type || 'news') : 'news';
-    document.getElementById('ann-icon').value    = item ? (item.icon  || '') : '';
-    document.getElementById('ann-date').value    = item ? (item.date  || today()) : today();
-    document.getElementById('ann-pinned').checked = !!(item && item.pinned);
-    if (annModal) annModal.style.display = 'flex';
-  }
-
-  function closeModal() {
-    if (annModal) annModal.style.display = 'none';
-    editingId = null;
-  }
-
-  function today() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  /* ── API calls ── */
-  function getPayload() {
-    return {
-      title:   document.getElementById('ann-title').value.trim(),
-      content: document.getElementById('ann-content').value.trim(),
-      type:    document.getElementById('ann-type').value,
-      icon:    document.getElementById('ann-icon').value.trim() || null,
-      date:    document.getElementById('ann-date').value,
-      pinned:  document.getElementById('ann-pinned').checked,
-    };
-  }
-
-  function saveAnnouncement() {
-    var payload = getPayload();
-    if (!payload.title || !payload.content || !payload.date) {
-      alert('Cần điền Tiêu đề, Nội dung và Ngày.');
-      return;
-    }
-
-    var url    = editingId ? '/api/auth/data?resource=announcements&id=' + editingId : '/api/auth/data?resource=announcements';
-    var method = editingId ? 'PUT' : 'POST';
-
-    fetch(url, {
-      method:      method,
-      credentials: 'include',
-      headers:     { 'Content-Type': 'application/json' },
-      body:        JSON.stringify(payload),
-    })
-      .then(function (r) {
-        return r.text().then(function (raw) {
-          var d = {};
-          try { d = raw ? JSON.parse(raw) : {}; } catch (_) {}
-          if (!r.ok) throw new Error(d.error || raw || 'Lỗi lưu');
-          return d;
-        });
-      })
-      .then(function () {
-        closeModal();
-        showToast(editingId ? '✅ Đã cập nhật thông báo' : '✅ Đã tạo thông báo', 'success');
-        loadAnnouncements();
-      })
-      .catch(function (e) { alert('Lỗi: ' + e.message); });
-  }
-
-  function deleteAnnouncement(id) {
-    fetch('/api/auth/data?resource=announcements&id=' + id, { method: 'DELETE', credentials: 'include' })
-      .then(function (r) {
-        return r.text().then(function (raw) {
-          var d = {};
-          try { d = raw ? JSON.parse(raw) : {}; } catch (_) {}
-          if (!r.ok) throw new Error(d.error || raw || 'Lỗi xoá');
-          return d;
-        });
-      })
-      .then(function () {
-        showToast('🗑️ Đã xoá thông báo', 'success');
-        loadAnnouncements();
-      })
-      .catch(function (e) { alert('Lỗi: ' + e.message); });
-  }
-
-  function togglePin(item) {
-    var payload = Object.assign({}, item, { pinned: !item.pinned });
-    fetch('/api/auth/data?resource=announcements&id=' + item.id, {
-      method:      'PUT',
-      credentials: 'include',
-      headers:     { 'Content-Type': 'application/json' },
-      body:        JSON.stringify(payload),
-    })
-      .then(function (r) {
-        return r.text().then(function (raw) {
-          var d = {};
-          try { d = raw ? JSON.parse(raw) : {}; } catch (_) {}
-          if (!r.ok) throw new Error(d.error || raw || 'Lỗi cập nhật');
-          return d;
-        });
-      })
-      .then(function () {
-        showToast(item.pinned ? '📍 Đã bỏ ghim' : '📌 Đã ghim thông báo', 'success');
-        loadAnnouncements();
-      })
-      .catch(function (e) { alert('Lỗi: ' + e.message); });
-  }
-
-  /* ── Event bindings ── */
-  if (btnCreate)  btnCreate.addEventListener('click',  function () { openModal(null); });
-  if (annCancel)  annCancel.addEventListener('click',  closeModal);
-  if (annSave)    annSave.addEventListener('click',    saveAnnouncement);
-  if (annModal) {
-    annModal.addEventListener('click', function (e) {
-      if (e.target === annModal) closeModal();
+  function bindComments() {
+    grid.querySelectorAll('.comment-toggle').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var panel = grid.querySelector('[data-comments-for="' + cssEscape(button.dataset.id) + '"]');
+        if (!panel) return;
+        panel.hidden = !panel.hidden;
+        if (!panel.hidden && !panel.dataset.loaded) loadComments(button.dataset.id, panel);
+      });
+    });
+    grid.querySelectorAll('.comment-form').forEach(function (form) {
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        var input = form.querySelector('input[name=content]');
+        API.addAnnouncementComment(form.dataset.id, input.value).then(function () {
+          input.value = '';
+          var panel = form.closest('.comment-panel');
+          loadComments(form.dataset.id, panel);
+        }).catch(function (error) { window.showToast ? showToast(error.message, 'error') : alert(error.message); });
+      });
     });
   }
 
-  function esc(s) {
-    return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function loadComments(id, panel) {
+    API.getAnnouncementComments(id).then(function (comments) {
+      panel.dataset.loaded = 'true';
+      var list = panel.querySelector('.comment-list');
+      var countEl = grid.querySelector('[data-count-for="' + cssEscape(id) + '"]');
+      if (countEl) countEl.textContent = comments.length;
+      list.innerHTML = comments.length ? comments.map(function (comment) {
+        return '<div class="comment-row"><span class="comment-avatar">' + esc((comment.username || 'D').charAt(0).toUpperCase()) + '</span><div><strong>' + esc(comment.username) + '</strong><p>' + esc(comment.content) + '</p></div></div>';
+      }).join('') : '<p class="comment-empty">Chưa có bình luận nào.</p>';
+    }).catch(function () {});
+  }
+
+  function typeLabel(type) { return ({ news: 'Tin tức', update: 'Update', maintenance: 'Bảo trì', event: 'Sự kiện' })[type] || 'Thông báo'; }
+  function formatDate(value) {
+    if (!value) return '';
+    var date = new Date(value);
+    return isNaN(date.getTime()) ? value : date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function safeColor(value, fallback) { return /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback; }
+  function cssEscape(value) { return String(value).replace(/\\/g, '\\\\').replace(/"/g, '\\"'); }
+  function esc(value) { return String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;'); }
+  function sanitizeHtml(value) {
+    var template = document.createElement('template');
+    template.innerHTML = value;
+    template.content.querySelectorAll('script,style,object,embed,form').forEach(function (node) { node.remove(); });
+    template.content.querySelectorAll('*').forEach(function (node) {
+      if (node.tagName === 'IFRAME') {
+        var frameSrc = node.getAttribute('src') || '';
+        if (!/^https:\/\/www\.youtube(?:-nocookie)?\.com\/embed\/[A-Za-z0-9_-]+/i.test(frameSrc)) {
+          node.replaceWith(document.createTextNode(''));
+          return;
+        }
+        Array.from(node.attributes).forEach(function (attribute) { node.removeAttribute(attribute.name); });
+        node.setAttribute('src', frameSrc);
+        node.setAttribute('title', 'YouTube video');
+        node.setAttribute('loading', 'lazy');
+        node.setAttribute('allowfullscreen', '');
+        return;
+      }
+      Array.from(node.attributes).forEach(function (attribute) {
+        if (/^on/i.test(attribute.name) || (attribute.name === 'href' && !/^(https?:|mailto:|#)/i.test(attribute.value)) || (attribute.name === 'src' && !/^(https?:|data:image\/|data:image\/gif;|\/)/i.test(attribute.value))) node.removeAttribute(attribute.name);
+      });
+      if (node.tagName === 'A') { node.setAttribute('target', '_blank'); node.setAttribute('rel', 'noopener noreferrer'); }
+    });
+    return template.innerHTML;
   }
 })();

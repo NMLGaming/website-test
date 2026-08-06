@@ -4,19 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VIELIST — Minecraft rankings, made legendary</title>
-  <meta name="description" content="VIELIST là trung tâm bảng xếp hạng Minecraft Việt Nam cho IS7MC.NET và KINGMC.VN." />
+  <meta name="description" content="VIELIST là trung tâm lưu giữ những nhà vua, cột mốc và câu chuyện của cộng đồng Minecraft Việt Nam." />
   <meta property="og:title" content="VIELIST — Minecraft rankings, made legendary" />
-  <meta property="og:description" content="Theo dõi những nhà vua và thông báo mới nhất của các server." />
+  <meta property="og:description" content="Nơi những cái tên Minecraft Việt Nam được nhớ đến." />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-
-  <!-- ===== Nav ===== -->
   <nav>
     <a class="nav-logo" href="/">VIELIST</a>
     <ul class="nav-links" id="nav-links">
       <li><a href="/" class="active"><span class="nav-dot"></span>Home</a></li>
-      <li><a href="/#announce-grid"><span class="nav-dot"></span>Thông báo</a></li>
+      <li><a href="/announcements"><span class="nav-dot"></span>Thông báo</a></li>
       <li><a href="/is7mc"><span class="nav-dot"></span>IS7MC</a></li>
       <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
     </ul>
@@ -26,7 +24,6 @@
     </button>
   </nav>
 
-  <!-- ===== Main ===== -->
   <main class="home-main">
     <section class="home-hero" aria-labelledby="home-title">
       <div class="hero-copy">
@@ -34,7 +31,8 @@
         <h1 id="home-title"><span id="home-title-main">Những người chơi</span><br /><span id="home-title-highlight">được nhớ tên.</span></h1>
         <p class="hero-lead" id="home-hero-lead">VIELIST lưu lại từng cuộc chiến, từng lần lên hạng và những cái tên làm nên lịch sử của cộng đồng Minecraft Việt Nam.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary btn-lg" href="/is7mc">Khám phá bảng xếp hạng <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-primary btn-lg" href="/is7mc">Khám phá các server <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-ghost btn-lg" href="#about">VIELIST là gì?</a>
         </div>
       </div>
       <div class="hero-orbit" aria-hidden="true">
@@ -61,7 +59,7 @@
       <div class="live-tile"><span class="live-dot"></span><span><strong>LIVE DATA</strong><small>Cập nhật liên tục</small></span></div>
     </section>
 
-    <section class="home-intro scroll-reveal" data-reveal>
+    <section class="home-intro scroll-reveal" id="about" data-reveal>
       <div class="intro-copy">
         <span class="section-kicker">THE NETWORK BEHIND THE NAMES</span>
         <h2 id="home-intro-title">Một mạng lưới dành cho những cái tên đáng nhớ.</h2>
@@ -81,87 +79,72 @@
       </article>
     </section>
 
-    <div class="page-header scroll-reveal" data-reveal>
-      <span class="section-kicker">LATEST FROM THE NETWORK</span>
-      <h2>Thông báo mới nhất</h2>
-      <p>Tin tức mới nhất từ <span class="accent">VIELIST</span> — cập nhật, sự kiện và bảo trì server.</p>
-    </div>
-
-    <!-- Admin: create button (shown only to OWNER via JS) -->
-    <div id="admin-announce-bar" style="display:none; margin-bottom:1.5rem;">
-      <button class="btn btn-primary" id="btn-create-announce">+ Tạo thông báo</button>
-    </div>
-
-    <!-- Modal: create / edit announcement -->
-    <div class="a-modal-overlay" id="ann-modal" style="display:none;">
-      <div class="modal-box" style="max-width:520px;">
-        <h3 id="ann-modal-title">Tạo thông báo</h3>
-        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:.75rem;">
-          <div>
-            <label class="field-lbl">Tiêu đề <span style="color:var(--red)">*</span></label>
-            <input id="ann-title" class="field-input" type="text" maxlength="200" placeholder="Tiêu đề thông báo…" />
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
-            <div>
-              <label class="field-lbl">Loại</label>
-              <select id="ann-type" class="field-input">
-                <option value="news">news</option>
-                <option value="update">update</option>
-                <option value="maintenance">maintenance</option>
-                <option value="event">event</option>
-              </select>
-            </div>
-            <div>
-              <label class="field-lbl">Icon</label>
-              <input id="ann-icon" class="field-input" type="text" maxlength="4" placeholder="📢" />
-            </div>
-          </div>
-          <div>
-            <label class="field-lbl">Ngày <span style="color:var(--red)">*</span></label>
-            <input id="ann-date" class="field-input" type="date" />
-          </div>
-          <div>
-            <label class="field-lbl">Nội dung <span style="color:var(--red)">*</span></label>
-            <textarea id="ann-content" class="field-input" rows="4" maxlength="2000" placeholder="Nội dung thông báo…"></textarea>
-          </div>
-          <label style="display:flex;align-items:center;gap:.5rem;font-size:.88rem;color:var(--text-sm);cursor:pointer;">
-            <input type="checkbox" id="ann-pinned" /> Ghim thông báo này
-          </label>
-        </div>
-        <div class="modal-actions">
-          <button class="btn btn-ghost" id="ann-modal-cancel">Hủy</button>
-          <button class="btn btn-primary" id="ann-modal-save">Lưu</button>
-        </div>
+    <section class="home-value-section scroll-reveal" data-reveal>
+      <div class="section-heading">
+        <span class="section-kicker">WHY VIELIST</span>
+        <h2>Một nơi để cạnh tranh, kết nối và thuộc về.</h2>
+        <p>Không chỉ là một bảng điểm. Đây là sân khấu cho những câu chuyện mà cộng đồng tạo nên mỗi ngày.</p>
       </div>
-    </div>
+      <div class="value-grid">
+        <article class="value-card"><span class="value-index">01</span><h3>Rõ ràng</h3><p>Những cột mốc quan trọng được trình bày gọn gàng, dễ theo dõi trên mọi thiết bị.</p></article>
+        <article class="value-card"><span class="value-index">02</span><h3>Công bằng</h3><p>Mỗi mùa giải, mỗi cuộc đua và mỗi lá phiếu đều có một vị trí rõ ràng trong lịch sử.</p></article>
+        <article class="value-card"><span class="value-index">03</span><h3>Đáng nhớ</h3><p>VIELIST biến một cái tên trong server thành câu chuyện mà cộng đồng có thể cùng nhìn lại.</p></article>
+      </div>
+    </section>
 
-    <div class="announce-grid scroll-reveal" id="announce-grid" data-reveal>
-      <!-- Rendered by announcements.js -->
-    </div>
+    <section class="home-achievements scroll-reveal" data-reveal>
+      <div class="section-heading"><span class="section-kicker">THE ARCHIVE</span><h2>Những dấu mốc đang được viết tiếp.</h2></div>
+      <div class="achievement-grid">
+        <div class="achievement-stat"><strong>02</strong><span>Server đang hoạt động</span></div>
+        <div class="achievement-stat"><strong>∞</strong><span>Câu chuyện có thể lưu giữ</span></div>
+        <div class="achievement-stat"><strong>24/7</strong><span>Không gian dành cho cộng đồng</span></div>
+      </div>
+    </section>
+
+    <section class="home-process scroll-reveal" data-reveal>
+      <div class="section-heading"><span class="section-kicker">THE ROAD TO KING</span><h2>Hành trình lên ngôi bắt đầu từ một cái tên.</h2></div>
+      <div class="process-line">
+        <article><span>01</span><h3>Tham gia</h3><p>Bước vào server và tạo dấu ấn của riêng bạn.</p></article>
+        <article><span>02</span><h3>Được đề cử</h3><p>Cộng đồng nhìn thấy tiềm năng và gọi tên bạn.</p></article>
+        <article><span>03</span><h3>Chinh phục</h3><p>Tích lũy phiếu bầu bằng những trận đấu đáng nhớ.</p></article>
+        <article><span>04</span><h3>Đội vương miện</h3><p>Tên bạn trở thành một phần lịch sử của server.</p></article>
+      </div>
+    </section>
+
+    <section class="home-faq scroll-reveal" data-reveal>
+      <div class="section-heading"><span class="section-kicker">FAQ</span><h2>Những điều thường được hỏi.</h2></div>
+      <div class="faq-list">
+        <details><summary>VIELIST dùng để làm gì?</summary><p>VIELIST là trung tâm theo dõi King, lịch sử và thông tin cộng đồng cho các server Minecraft Việt Nam.</p></details>
+        <details><summary>Làm sao để tham gia đề cử?</summary><p>Đăng nhập bằng Discord, chọn server và đề cử một ứng viên. Mỗi người chỉ có một đề cử độc lập trên từng server.</p></details>
+        <details><summary>Thông báo được đăng ở đâu?</summary><p>Thông báo được quản lý riêng trong mục Thông báo. Chỉ Admin mới có thể tạo và chỉnh sửa bài đăng.</p></details>
+      </div>
+    </section>
+
+    <section class="home-discord scroll-reveal" data-reveal>
+      <div>
+        <span class="section-kicker">JOIN THE COMMUNITY</span>
+        <h2>Đừng chỉ xem lịch sử. Hãy cùng viết tiếp.</h2>
+        <p>Tham gia Discord để nhận tin mới, trò chuyện với cộng đồng và không bỏ lỡ cuộc đua lên ngôi tiếp theo.</p>
+      </div>
+      <a class="btn btn-primary btn-lg" data-discord-link href="https://discord.com" target="_blank" rel="noopener">Tham gia Discord <span aria-hidden="true">↗</span></a>
+    </section>
 
     <section class="home-bottom-cta scroll-reveal" data-reveal>
-      <div>
-        <span class="section-kicker">YOUR NAME. YOUR LEGACY.</span>
-        <h2 id="home-cta-title">Không chỉ là một con số.</h2>
-        <p id="home-cta-body">Khám phá những nhà vua và cập nhật mới nhất từ cộng đồng.</p>
-      </div>
+      <div><span class="section-kicker">YOUR NAME. YOUR LEGACY.</span><h2 id="home-cta-title">Không chỉ là một con số.</h2><p id="home-cta-body">Khám phá những nhà vua và các cột mốc của VIELIST.</p></div>
+      <a class="btn btn-ghost" href="/announcements">Xem thông báo <span aria-hidden="true">↗</span></a>
     </section>
   </main>
 
-  <!-- ===== Footer ===== -->
   <footer>
     <p><strong id="site-footer-text">© 2026 VIELIST — Minecraft Leaderboard</strong> &mdash;
       <a href="/is7mc">IS7MC.NET</a> &bull; <a href="/kingmc">KINGMC.VN</a>
     </p>
   </footer>
-
   <button id="back-top" title="Lên đầu trang">↑</button>
   <div id="toast-container"></div>
-
   <script src="/assets/js/data.js"></script>
   <script src="/script.js"></script>
   <script src="/assets/js/site-settings.js"></script>
   <script src="/assets/js/auth-nav.js"></script>
-  <script src="/assets/js/announcements.js"></script>
 </body>
 </html>

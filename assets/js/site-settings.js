@@ -20,6 +20,8 @@
     cta_title: 'Không chỉ là một con số.',
     cta_body: 'Tra cứu hồ sơ, xem thứ hạng và tìm hiểu câu chuyện phía sau mỗi player.',
     footer_text: '© 2026 VIELIST — Minecraft Leaderboard',
+    discord_link: 'https://discord.com',
+    join_discord_enabled: 'true',
     primary_color: '#00d4ff',
     effects_enabled: 'true'
   };
@@ -60,6 +62,10 @@
     text('home-cta-title', settings.cta_title);
     text('home-cta-body', settings.cta_body);
     text('site-footer-text', settings.footer_text);
+    document.querySelectorAll('[data-discord-link]').forEach(function (link) {
+      link.href = settings.discord_link || 'https://discord.com';
+      link.style.display = settings.join_discord_enabled === 'false' ? 'none' : '';
+    });
 
     var heroLogo = imageUrl(settings.hero_logo_url);
     var sigil = document.getElementById('hero-logo-mark');

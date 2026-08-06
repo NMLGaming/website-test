@@ -59,6 +59,8 @@ const SETTING_DEFAULTS = {
   cta_title: 'Không chỉ là một con số.',
   cta_body: 'Khám phá những nhà vua và các thông báo mới nhất của VIELIST.',
   footer_text: '© 2026 VIELIST — Minecraft Leaderboard',
+  discord_link: 'https://discord.com',
+  join_discord_enabled: 'true',
   primary_color: '#00d4ff', effects_enabled: 'true',
 };
 const SETTING_KEYS = Object.keys(SETTING_DEFAULTS);
@@ -86,6 +88,14 @@ function announcementObject(row) {
   return {
     id: row.id, type: row.type, icon: row.icon, title: row.title,
     content: row.content, date: row.date, pinned: row.pinned,
+    author: {
+      username: row.author_username || 'VIELIST Admin',
+      avatar: row.author_avatar || '',
+      role: row.author_role || 'Admin',
+    },
+    border_color: row.border_color || '#00d4ff',
+    background_color: row.background_color || '#101827',
+    accent_color: row.accent_color || '#00d4ff',
     scheduled_at: row.scheduled_at || null,
   };
 }
@@ -133,19 +143,28 @@ async function handleAnnouncements(req, res) {
       return sendApiError(res, 400, 'title, content, date required');
     if (!DB) return sendApiError(res, 503, 'Database not configured');
     if (req.method === 'POST') {
+      const user = verifyToken(req) || {};
+      const author = body.author || {};
       const result = await query(
-        `INSERT INTO announcements (type, icon, title, content, date, pinned, scheduled_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+        `INSERT INTO announcements
+         (type, icon, title, content, date, pinned, author_username, author_avatar, author_role,
+          border_color, background_color, accent_color, scheduled_at)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13) RETURNING *`,
         [body.type || 'news', body.icon || '📢', body.title, body.content, body.date,
-          !!body.pinned, body.scheduled_at || null]);
+          !!body.pinned, user.username || author.username || 'VIELIST Admin',
+          user.avatar || author.avatar || '', 'Admin',
+          body.border_color || '#00d4ff', body.background_color || '#101827',
+          body.accent_color || '#00d4ff', body.scheduled_at || null]);
       return res.status(201).json(Object.assign({ success: true }, announcementObject(result.rows[0])));
     }
     if (!id) return sendApiError(res, 400, 'id required');
     const result = await query(
       `UPDATE announcements SET type=$1, icon=$2, title=$3, content=$4, date=$5,
-       pinned=$6, scheduled_at=$7, updated_at=NOW() WHERE id=$8 RETURNING *`,
+       pinned=$6, border_color=$7, background_color=$8, accent_color=$9,
+       scheduled_at=$10, updated_at=NOW() WHERE id=$11 RETURNING *`,
       [body.type || 'news', body.icon || '📢', body.title, body.content, body.date,
-        !!body.pinned, body.scheduled_at || null, id]);
+        !!body.pinned, body.border_color || '#00d4ff', body.background_color || '#101827',
+        body.accent_color || '#00d4ff', body.scheduled_at || null, id]);
     return result.rows.length
       ? res.status(200).json(Object.assign({ success: true }, announcementObject(result.rows[0])))
       : sendApiError(res, 404, 'Not found');
@@ -160,6 +179,30 @@ async function handleAnnouncements(req, res) {
       : sendApiError(res, 404, 'Not found');
   }
   return sendApiError(res, 405, 'Method not allowed');
+}
+
+async function handleAnnouncementComments(req, res) {
+  const announcementId = String(req.query.announcement_id || '');
+  if (!announcementId) return sendApiError(res, 400, 'announcement_id required');
+  if (req.method === 'GET') {
+    if (!DB) return res.status(200).json({ success: true, data: [] });
+    const result = await query(
+      'SELECT id, announcement_id, username, avatar, content, created_at FROM announcement_comments WHERE announcement_id=$1 ORDER BY created_at ASC',
+      [announcementId]);
+    return res.status(200).json({ success: true, data: result.rows });
+  }
+  if (req.method !== 'POST') return sendApiError(res, 405, 'Method not allowed');
+  const user = verifyToken(req);
+  if (!user) return sendApiError(res, 401, 'Đăng nhập Discord để bình luận');
+  const content = String((req.body || {}).content || '').trim();
+  if (!content) return sendApiError(res, 400, 'Nội dung bình luận không được để trống');
+  if (!DB) return sendApiError(res, 503, 'Database not configured');
+  const result = await query(
+    `INSERT INTO announcement_comments (announcement_id, username, avatar, content)
+     VALUES ($1,$2,$3,$4)
+     RETURNING id, announcement_id, username, avatar, content, created_at`,
+    [announcementId, user.username || 'Discord user', user.avatar || '', content]);
+  return res.status(201).json(Object.assign({ success: true }, result.rows[0]));
 }
 
 async function handleLeaderboard(req, res) {
@@ -303,6 +346,7 @@ async function handleData(req, res) {
     const resource = Array.isArray(req.query.resource)
       ? req.query.resource[0] : req.query.resource;
     if (resource === 'announcements') return await handleAnnouncements(req, res);
+    if (resource === 'announcement-comments') return await handleAnnouncementComments(req, res);
     if (resource === 'leaderboard') return await handleLeaderboard(req, res);
     if (resource === 'settings') return await handleSettings(req, res);
     if (resource === 'stats') return await handleStats(req, res);

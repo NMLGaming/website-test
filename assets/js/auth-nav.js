@@ -59,6 +59,7 @@
         '</button>' +
         '<div class="nav-dropdown" id="nav-dropdown" role="menu">' +
           (isOwner ? '<a href="/admin" class="nav-dd-item" role="menuitem">Admin Dashboard</a>' : '') +
+          '<a href="https://discord.com" target="_blank" rel="noopener" class="nav-dd-item nav-dd-discord" data-nav-discord hidden role="menuitem"><span class="nav-dd-discord-copy"><strong>Bạn chưa tham gia Discord</strong><small>Join Discord</small></span></a>' +
           '<hr class="nav-dd-sep"/>' +
           '<button class="nav-dd-item nav-dd-logout" id="nav-logout-btn" role="menuitem">Đăng xuất</button>' +
         '</div>' +
@@ -67,8 +68,10 @@
     // An Owner can optionally set a custom site avatar from Admin > Settings.
     // Discord remains the default source when no custom avatar was uploaded.
     var customAvatar = '';
+    var localSettings = {};
     try {
-      customAvatar = JSON.parse(localStorage.getItem('vielist_settings') || '{}').avatar_url || '';
+      localSettings = JSON.parse(localStorage.getItem('vielist_settings') || '{}');
+      customAvatar = localSettings.avatar_url || '';
     } catch (_) {}
     if (customAvatar && /^(data:image\/|https?:\/\/|\/)/i.test(customAvatar)) {
       var custom = document.querySelector('#nav-user-btn .nav-avatar, #nav-user-btn .nav-avatar-fallback');
@@ -76,6 +79,11 @@
         if (custom.tagName === 'IMG') custom.src = customAvatar;
         else custom.outerHTML = '<img src="' + esc(customAvatar) + '" alt="" class="nav-avatar">';
       }
+    }
+    var discordItem = document.querySelector('[data-nav-discord]');
+    if (discordItem) {
+      discordItem.href = localSettings.discord_link || 'https://discord.com';
+      discordItem.hidden = localSettings.join_discord_enabled === 'false';
     }
 
     document.addEventListener('vielist:settings', function (event) {
@@ -87,6 +95,11 @@
       document.querySelectorAll('#nav-user-btn .nav-avatar-fallback').forEach(function (fallbackEl) {
         fallbackEl.outerHTML = '<img src="' + esc(value) + '" alt="" class="nav-avatar">';
       });
+      var discord = document.querySelector('[data-nav-discord]');
+      if (discord) {
+        discord.href = event.detail.discord_link || 'https://discord.com';
+        discord.hidden = event.detail.join_discord_enabled === 'false';
+      }
     });
 
     // Toggle dropdown

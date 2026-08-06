@@ -13,7 +13,8 @@ thuần để có thể upload trực tiếp lên GitHub và deploy trên Vercel
 
 ```
 vielist2/
-├── index.html              # Home (thông báo)
+├── index.html              # Home landing page
+├── announcements/index.html # Trang thông báo riêng
 ├── style.css               # CSS dùng chung
 ├── script.js               # JS dùng chung
 ├── is7mc/index.html        # IS7MC King leaderboard
@@ -127,7 +128,8 @@ Sau khi đặt → **Redeploy**.
 ### Kết quả
 
 ```
-https://ten-web.vercel.app/         ← Home (thông báo)
+https://ten-web.vercel.app/         ← Home giới thiệu VIELIST
+https://ten-web.vercel.app/announcements ← Thông báo riêng
 https://ten-web.vercel.app/is7mc    ← IS7MC Leaderboard
 https://ten-web.vercel.app/kingmc   ← KINGMC Leaderboard
 https://ten-web.vercel.app/admin    ← 🔒 Admin (Owner only)
@@ -208,7 +210,7 @@ Sau khi đăng nhập:
 | Thông báo | Đăng / sửa / xóa / ghim / lên lịch |
 | IS7MC | King: thêm/sửa/xóa nhà vua, đổi điểm/rank |
 | KINGMC | King: thêm/sửa/xóa nhà vua, đổi điểm/rank |
-| Settings | Upload logo Home/logo menu/avatar, đổi ảnh nền, nội dung Home, màu, footer, hiệu ứng |
+| Settings | Upload logo Home/logo menu/avatar, xóa ảnh, đổi ảnh nền, nội dung Home, màu, footer, link Discord, hiệu ứng |
 
 Quyền Owner được kiểm tra ở server-side qua `OWNER_DISCORD_ID`. Người đã đăng nhập nhưng
 không phải Owner sẽ nhận `403 Forbidden` khi truy cập Admin API và màn hình Admin không được mở.
