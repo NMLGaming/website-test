@@ -1,252 +1,103 @@
-# VIELIST — King Leaderboard
+# VIELIST — The home of Kings
 
-Website quản lý bảng xếp hạng King Minecraft với đăng nhập Discord OAuth2 và admin panel đầy đủ.
-HTML/CSS/JS thuần + một Vercel Serverless Function + PostgreSQL backend.
+VIELIST là website lưu giữ các vị vua và lịch sử triều đại cho hai server Minecraft Việt Nam: **IS7MC.NET** và **KINGMC.VN**.
 
-## Giao diện
+## Tính năng
 
-Bản hiện tại dùng giao diện dark glassmorphism với Home hub, server cards, live data rail,
-leaderboard responsive và trang KINGMC có khu vực “Current King” riêng. Code vẫn là HTML/CSS/JS
-thuần để có thể upload trực tiếp lên GitHub và deploy trên Vercel, không cần build step.
+- Home là trang giới thiệu dài, không hiển thị Thông báo.
+- Mỗi server có đúng một nhà vua đang trị vì.
+- Mỗi trang server có đúng ba mục: **King**, **Đề cử**, **Lịch sử vua**.
+- Khi chưa có vua, trang hiển thị lời mời tham gia đề cử thay vì ảnh lỗi.
+- Admin có thể chỉnh avatar, tên, triều đại, ngày lên ngôi, mô tả, banner và logo của vua.
+- Admin có thể tạo đợt đề cử với tiêu đề, mô tả, ngày giờ bắt đầu và kết thúc.
+- Admin thêm được không giới hạn ứng viên; mỗi ứng viên có avatar, tên và mô tả.
+- Người dùng chỉ cần đăng nhập Discord. Mỗi server, mỗi người chỉ có một đề cử; muốn đổi phải bấm **Hủy đề cử** trước.
+- Khi hết thời gian, hệ thống tự khóa đợt đề cử, ẩn nút đề cử và đưa người có nhiều phiếu nhất lên ngôi.
+- Lịch sử lưu avatar, tên, triều đại, ngày lên ngôi, ngày kết thúc và lý do kết thúc.
+- Admin phải nhập lý do khi kết thúc triều đại hoặc xóa một dòng khỏi lịch sử.
+- Admin có thể thêm vua trực tiếp, không cần qua đề cử.
+- Không còn hệ thống PvP, bảng xếp hạng, ranking, tìm kiếm người chơi hay hồ sơ người chơi.
+- Giao diện giữ phong cách dark, glass, neon và animation.
 
-## Cấu trúc project
+## Cấu trúc
 
-```
-vielist2/
-├── index.html              # Home landing page
-├── announcements/index.html # Trang thông báo riêng
-├── style.css               # CSS dùng chung
-├── script.js               # JS dùng chung
-├── is7mc/index.html        # IS7MC King leaderboard
-├── kingmc/index.html       # KINGMC King leaderboard
-├── admin/index.html        # 🔒 Admin SPA (chỉ Owner)
-│
-├── api/
-│   └── auth/[action].js    # OAuth + grouped content/admin API
-│
-├── assets/
-│   ├── css/admin.css
-│   ├── js/
-│   │   ├── auth-nav.js     # Discord login/user menu trong navbar
-│   │   ├── data.js         # Public data layer
-│   │   ├── admin-api.js    # Admin API client
-│   │   ├── admin.js        # Admin SPA
-│   │   ├── announcements.js
-│   │   ├── leaderboard.js
-│   └── data/               # Fallback JSON (khi không có DB)
-├── lib/
-│   ├── auth.js             # JWT cookie + owner check
-│   └── db.js               # PostgreSQL pool
-│
-├── database/
-│   ├── schema.sql
-│   └── seed.sql
-│
-├── package.json
-├── vercel.json
-└── README.md
+```text
+index.html                 Home giới thiệu
+announcements/index.html   Trang Thông báo riêng
+is7mc/index.html           King / Đề cử / Lịch sử vua của IS7MC
+kingmc/index.html          King / Đề cử / Lịch sử vua của KINGMC
+admin/index.html           Dashboard Admin
+api/auth/[action].js       Discord OAuth và API King
+assets/js/king.js          Giao diện King công khai
+assets/js/admin-api.js     API client cho Admin
+assets/js/admin.js         Dashboard Admin
+assets/js/data.js          API client công khai
+database/schema.sql        Schema PostgreSQL
+database/seed.sql          Dữ liệu thông báo mẫu
+lib/auth.js                JWT httpOnly cookie và phân quyền Owner
+lib/db.js                  PostgreSQL pool và bootstrap schema
 ```
 
-## Bảo mật
+## API chính
 
-| Thông tin | Nơi lưu | Ghi chú |
-|-----------|---------|---------|
-| Discord Client ID | Env var `DISCORD_CLIENT_ID` | Public trong OAuth URL nhưng vẫn nên để env var |
-| Discord Client Secret | Env var `DISCORD_CLIENT_SECRET` | **Không bao giờ để trong code** |
-| Owner Discord ID | Env var `OWNER_DISCORD_ID` | Check server-side, không bao giờ gửi frontend |
-| JWT Secret | Env var `JWT_SECRET` | Ký session cookie |
-| Database URL | Env var `DATABASE_URL` | Connection string PostgreSQL |
-| Redirect URI | Env var `DISCORD_REDIRECT_URI` | Phải khớp Discord Developer Portal |
-
-**Nguyên tắc bảo mật:**
-- Owner ID chỉ tồn tại trong env var phía server — frontend không thể biết giá trị này
-- Discord Client Secret chỉ dùng server-side để exchange code
-- Session dùng JWT trong httpOnly cookie — JavaScript frontend không đọc được
-- Tất cả API write endpoint đều verify role=OWNER ở phía server
-
-## Setup Database (Neon — miễn phí)
-
-1. Truy cập [neon.tech](https://neon.tech) → Tạo account → **New Project**
-2. Copy **Connection string** (`postgresql://user:pass@host/db?sslmode=require`)
-3. Mở **SQL Editor** → chạy nội dung `database/schema.sql`
-4. (Tùy chọn) chạy `database/seed.sql` để có dữ liệu mẫu
-
-## Setup Discord OAuth2
-
-### Bước 1 — Tạo Discord App
-
-1. Vào [discord.com/developers/applications](https://discord.com/developers/applications)
-2. **New Application** → đặt tên
-3. Vào tab **OAuth2**
-4. Copy **Client ID** (công khai, OK)
-5. **Reset Secret** → Copy **Client Secret** (giữ bí mật!)
-
-### Bước 2 — Thêm Redirect URI
-
-Trong tab **OAuth2 → Redirects**, thêm:
-```
-https://ten-web-cua-ban.vercel.app/api/auth/callback
-```
-*(Thêm cả `http://localhost:3000/api/auth/callback` để dev local)*
-
-### Bước 3 — Tìm Owner Discord ID
-
-1. Discord → Settings → Advanced → bật **Developer Mode**
-2. Click chuột phải vào user của bạn → **Copy User ID**
-
-## Deploy lên Vercel
-
-### Push lên GitHub
-
-```bash
-cd minecraft-leaderboard
-git init && git add . && git commit -m "init"
-git remote add origin https://github.com/<username>/<repo>.git
-git push -u origin main
-```
-
-### Import vào Vercel
-
-1. [vercel.com](https://vercel.com) → **Add New → Project** → chọn repo
-2. Framework Preset: **Other** → **Deploy**
-
-### Cài Environment Variables
-
-Vào **Settings → Environment Variables**:
-
-| Key | Giá trị |
-|-----|---------|
-| `DISCORD_CLIENT_ID` | Client ID từ Discord Developer Portal |
-| `DISCORD_CLIENT_SECRET` | Client Secret (đã reset nếu bị lộ) |
-| `DISCORD_REDIRECT_URI` | `https://ten-web.vercel.app/api/auth/callback` |
-| `OWNER_DISCORD_ID` | Discord User ID của bạn |
-| `JWT_SECRET` | Chuỗi ngẫu nhiên 32+ ký tự ([tạo tại đây](https://generate-secret.vercel.app/32)) |
-| `DATABASE_URL` | Connection string Neon PostgreSQL |
-
-Sau khi đặt → **Redeploy**.
-
-### Kết quả
-
-```
-https://ten-web.vercel.app/         ← Home giới thiệu VIELIST
-https://ten-web.vercel.app/announcements ← Thông báo riêng
-https://ten-web.vercel.app/is7mc    ← IS7MC Leaderboard
-https://ten-web.vercel.app/kingmc   ← KINGMC Leaderboard
-https://ten-web.vercel.app/admin    ← 🔒 Admin (Owner only)
-```
-
-Các API nội dung được gộp trong một function:
-
-```
+```text
+/api/auth/data?resource=king&server=is7mc|kingmc
+/api/auth/data?resource=nomination&server=is7mc|kingmc
+/api/auth/data?resource=history&server=is7mc|kingmc
+/api/auth/data?resource=campaigns&server=is7mc|kingmc
+/api/auth/data?resource=candidates&campaign_id=<id>
 /api/auth/data?resource=announcements
-/api/auth/data?resource=leaderboard&server=is7mc|kingmc
 /api/auth/data?resource=settings
 /api/auth/data?resource=stats
 ```
 
-Các URL cũ `/player`, `/profile`, `/ranking`, `/search-player`, `/top-pvp` và
-`/legacy` được redirect về trang hợp lệ để bookmark cũ không bị 404.
+## Cài đặt PostgreSQL
 
-## Luồng đăng nhập
+1. Tạo một PostgreSQL database.
+2. Chạy toàn bộ `database/schema.sql`.
+3. Có thể chạy thêm `database/seed.sql` để có Thông báo mẫu.
 
-```
-User click "Login with Discord"
-        ↓
-GET /api/auth/discord
-  → Tạo CSRF state
-  → Set state cookie (httpOnly, 5 phút)
-  → Redirect → discord.com/oauth2/authorize
-        ↓
-Discord xác thực user → Redirect về
-GET /api/auth/callback?code=...&state=...
-  → Verify state cookie (CSRF check)
-  → Exchange code → access token (server-side, secret không lộ)
-  → Fetch discord user info
-  → Check discord_id === OWNER_DISCORD_ID (server-side)
-  → Tạo JWT: { username, avatar, role } — KHÔNG có discord_id
-  → Set session cookie (httpOnly, 7 ngày)
-  → Redirect → /admin hoặc /
-        ↓
-GET /api/auth/me → { authenticated, username, avatar, role }
-  → Frontend biết username, avatar, role
-  → Không bao giờ biết discord_id hay owner_id
+Schema sẽ chủ động xóa bảng dữ liệu cũ `leaderboard` khi chạy trên cài đặt cũ, vì hệ thống này không còn sử dụng dữ liệu đó.
+
+## Discord OAuth
+
+Tạo Discord Application tại [Discord Developer Portal](https://discord.com/developers/applications), thêm Redirect URI:
+
+```text
+https://<domain-cua-ban>/api/auth/callback
 ```
 
-## Dev local
+Thiết lập các biến môi trường sau trên Vercel:
 
-Cài [Vercel CLI](https://vercel.com/docs/cli):
+| Biến | Mục đích |
+| --- | --- |
+| `DISCORD_CLIENT_ID` | Client ID của Discord Application |
+| `DISCORD_CLIENT_SECRET` | Client Secret, chỉ dùng server-side |
+| `DISCORD_REDIRECT_URI` | URL callback đúng với Discord Developer Portal |
+| `OWNER_DISCORD_ID` | Discord User ID của Admin/Owner |
+| `SESSION_SECRET` | Chuỗi bí mật để ký session |
+| `DATABASE_URL` | Connection string PostgreSQL |
 
-```bash
-npm i -g vercel
-cd minecraft-leaderboard
+`JWT_SECRET` vẫn được hỗ trợ như alias của `SESSION_SECRET`. Không commit secret thật vào GitHub; `.gitignore` đã chặn file `.env`.
+
+## Deploy lên Vercel
+
+1. Giải nén ZIP và upload nội dung bên trong lên repository GitHub mới.
+2. Import repository vào Vercel với Framework Preset **Other**.
+3. Không cần Build Command hay Output Directory.
+4. Thêm các biến môi trường ở trên.
+5. Redeploy sau khi cấu hình xong.
+
+Các URL:
+
+```text
+/                 Home
+/announcements    Thông báo
+/is7mc            King IS7MC
+/kingmc           King KINGMC
+/admin            Dashboard Admin
 ```
 
-Tạo `.env.local`:
-```env
-DISCORD_CLIENT_ID=your_client_id
-DISCORD_CLIENT_SECRET=your_client_secret
-DISCORD_REDIRECT_URI=http://localhost:3000/api/auth/callback
-OWNER_DISCORD_ID=1223927653455757383
-JWT_SECRET=dev-secret-min-32-chars-change-this
-DATABASE_URL=postgresql://...
-```
+## Chế độ chưa nối database
 
-Chạy:
-```bash
-vercel dev
-# Mở http://localhost:3000
-```
-
-## Admin Panel
-
-Truy cập `/admin` → nếu chưa đăng nhập sẽ hiện nút "Đăng nhập với Discord".
-Sau khi đăng nhập:
-- **OWNER**: thấy full admin dashboard
-- **USER thường**: thấy trang 403
-
-| Section | Chức năng |
-|---------|-----------|
-| Dashboard | Tổng quan stats, trạng thái database |
-| Thông báo | Đăng / sửa / xóa / ghim / lên lịch |
-| IS7MC | King: thêm/sửa/xóa nhà vua, đổi điểm/rank |
-| KINGMC | King: thêm/sửa/xóa nhà vua, đổi điểm/rank |
-| Settings | Upload logo Home/logo menu/avatar, xóa ảnh, đổi ảnh nền, nội dung Home, màu, footer, link Discord, hiệu ứng |
-
-Quyền Owner được kiểm tra ở server-side qua `OWNER_DISCORD_ID`. Người đã đăng nhập nhưng
-không phải Owner sẽ nhận `403 Forbidden` khi truy cập Admin API và màn hình Admin không được mở.
-
-### Đổi logo, avatar và nội dung Home
-
-Vào `/admin` → `Settings`:
-
-- **Logo chữ V ở Home**: chọn ảnh PNG/JPG/GIF. Ảnh được đặt vào vòng tròn phát sáng và có hiệu ứng hover.
-- **Logo trên thanh menu**: chọn ảnh logo; nếu bỏ trống, website dùng logo chữ.
-- **Avatar tuỳ chỉnh**: chọn ảnh; khi hiển thị sẽ luôn là hình tròn và nổi lên nhẹ khi di chuột.
-- **Nội dung trang chủ**: chỉnh tiêu đề, mô tả, các đoạn nội dung dài và footer ngay trong form.
-- **Hiệu ứng animation**: bật/tắt hiệu ứng xuất hiện khi cuộn trang.
-
-Ảnh được nén nhẹ trước khi lưu. Trong bản demo chưa nối PostgreSQL, các cài đặt vẫn được lưu
-trong trình duyệt để có thể xem ngay. Khi deploy cùng Neon và chạy `database/schema.sql`,
-settings sẽ được lưu trong bảng `settings`.
-
-## Deploy nhanh lên Vercel
-
-1. Giải nén file ZIP và upload **nội dung bên trong thư mục `vielist2`** lên một repository GitHub mới.
-2. Vào Vercel → **Add New Project** → chọn repository → giữ Framework là **Other**.
-3. Không cần Build Command và Output Directory; Vercel sẽ phục vụ các file HTML tĩnh và thư mục `api/`.
-4. Thêm các Environment Variables: `SESSION_SECRET`, `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`,
-   `DISCORD_REDIRECT_URI`, `OWNER_DISCORD_ID`, và `DATABASE_URL` nếu dùng PostgreSQL.
-5. Sau khi deploy, thêm chính xác URL
-   `https://<domain-cua-ban>/api/auth/callback` vào Discord Developer Portal → OAuth2 → Redirects.
-
-Nếu chưa nối database, website vẫn chạy chế độ demo với dữ liệu trong `assets/data/`.
-File `.env.example` chỉ là mẫu an toàn. Không commit secret thật vào GitHub; `.gitignore`
-đã chặn các file `.env` khỏi repository. Nếu đổi domain Vercel, nhớ cập nhật đồng thời
-`DISCORD_REDIRECT_URI` trên Vercel và Redirect URI trong Discord Developer Portal.
-
-## Chế độ Demo (không có DB)
-
-Nếu `DATABASE_URL` chưa được đặt:
-- Trang public hoạt động bình thường (đọc từ `assets/data/*.json`)
-- Đăng nhập Discord vẫn hoạt động (cần đủ Discord + JWT env vars)
-- Các thao tác write (thêm/sửa/xóa) trả về lỗi 503
+Các trang giới thiệu, thông báo và giao diện công khai vẫn có thể mở. Những thao tác tạo/sửa/xóa dữ liệu King, đề cử và lịch sử cần `DATABASE_URL` vì đây là dữ liệu phải lưu an toàn trên server.

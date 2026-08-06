@@ -58,7 +58,7 @@
           '</svg>' +
         '</button>' +
         '<div class="nav-dropdown" id="nav-dropdown" role="menu">' +
-          (isOwner ? '<a href="/admin" class="nav-dd-item" role="menuitem">Admin Dashboard</a>' : '') +
+           (isOwner ? '<a href="/admin" class="nav-dd-item" role="menuitem">ADMIN Dashboard</a>' : '') +
           '<a href="https://discord.com" target="_blank" rel="noopener" class="nav-dd-item nav-dd-discord" data-nav-discord hidden role="menuitem"><span class="nav-dd-discord-copy"><strong>Bạn chưa tham gia Discord</strong><small>Join Discord</small></span></a>' +
           '<hr class="nav-dd-sep"/>' +
           '<button class="nav-dd-item nav-dd-logout" id="nav-logout-btn" role="menuitem">Đăng xuất</button>' +

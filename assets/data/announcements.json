@@ -2,8 +2,8 @@
   {
     "id": "1",
     "type": "update",
-    "title": "Update 1.0 — Ra mắt Leaderboard",
-    "content": "Hệ thống bảng xếp hạng King chính thức ra mắt cho cả hai server IS7MC.NET và KINGMC.VN.",
+    "title": "VIELIST đã mở cửa",
+    "content": "Nơi lưu giữ các vị vua và triều đại của IS7MC.NET và KINGMC.VN.",
     "date": "2026-08-01",
     "icon": "🚀"
   },
@@ -27,7 +27,7 @@
     "id": "4",
     "type": "news",
     "title": "Chào mừng đến VIELIST",
-    "content": "VIELIST là hệ thống quản lý bảng xếp hạng cho các server Minecraft Việt Nam. Theo dõi để nhận thông báo mới nhất!",
+    "content": "VIELIST là nơi cộng đồng đề cử, vinh danh và lưu giữ lịch sử các vị vua Minecraft Việt Nam.",
     "date": "2026-07-28",
     "icon": "📢"
   }

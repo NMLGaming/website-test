@@ -1,8 +1,8 @@
 {
-  "name": "vielist-minecraft-leaderboard",
+  "name": "vielist-kings",
   "version": "1.0.0",
   "private": true,
-  "description": "VIELIST — Minecraft Leaderboard with Vercel serverless backend",
+  "description": "VIELIST — King, nominations and royal history for IS7MC and KINGMC",
   "dependencies": {
     "jsonwebtoken": "^9.0.2",
     "pg": "^8.12.0"

@@ -3,13 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IS7MC.NET — King ranking | VIELIST</title>
-  <meta name="description" content="Bảng xếp hạng King chính thức của IS7MC.NET trên VIELIST." />
+  <title>IS7MC.NET — King | VIELIST</title>
+  <meta name="description" content="Ngai vàng, đề cử và lịch sử vua của IS7MC.NET." />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-
-  <!-- ===== Nav ===== -->
   <nav>
     <a class="nav-logo" href="/">VIELIST</a>
     <ul class="nav-links" id="nav-links">
@@ -19,43 +17,24 @@
       <li><a href="/kingmc"><span class="nav-dot"></span>KINGMC</a></li>
     </ul>
     <div class="nav-auth" id="nav-auth"></div>
-    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
   </nav>
-
-  <!-- ===== Main ===== -->
-  <main>
+  <main class="king-page">
     <div class="page-header">
-      <span class="section-kicker">THE COMPETITIVE SERVER</span>
+      <span class="section-kicker">THE CROWNED SERVER</span>
       <h1>IS7MC<span class="accent">.NET</span></h1>
-      <p>Bảng xếp hạng King chính thức của server <span class="accent">IS7MC.NET</span>.</p>
+      <p>Mỗi thời điểm chỉ có một người đứng trên ngai vàng của IS7MC.</p>
     </div>
-
-    <div class="tab-panel active" id="tab-king">
-      <div class="lb-search-wrap">
-        <span class="lb-search-icon">🔎</span>
-        <input id="search-king" class="lb-search-input" type="text"
-          placeholder="Tìm kiếm nhà vua…" autocomplete="off" />
-      </div>
-      <div id="board-king"></div>
-    </div>
+    <div id="king-app"></div>
   </main>
-
-  <footer>
-    <p><strong>© 2026 VIELIST</strong> &mdash; Minecraft Leaderboard &mdash;
-      <a href="/is7mc">IS7MC.NET</a> &bull; <a href="/kingmc">KINGMC.VN</a>
-    </p>
-  </footer>
-
+  <footer><p><strong>© 2026 VIELIST</strong> — The home of Kings — <a href="/is7mc">IS7MC.NET</a> • <a href="/kingmc">KINGMC.VN</a></p></footer>
   <button id="back-top" title="Lên đầu trang">↑</button>
   <div id="toast-container"></div>
-
-  <script>window.LB_SERVER = 'is7mc';</script>
+  <script>window.KING_SERVER = 'is7mc';</script>
   <script src="/assets/js/data.js"></script>
   <script src="/script.js"></script>
   <script src="/assets/js/site-settings.js"></script>
   <script src="/assets/js/auth-nav.js"></script>
-  <script src="/assets/js/leaderboard.js"></script>
+  <script src="/assets/js/king.js"></script>
 </body>
 </html>

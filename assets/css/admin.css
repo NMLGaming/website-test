@@ -311,38 +311,6 @@
 }
 
 /* ============================================================
-   Leaderboard Tabs
-============================================================ */
-.a-tabs {
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 1.25rem;
-  background: var(--bg-glass);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--r-md);
-  padding: 4px;
-  width: fit-content;
-}
-
-.a-tab {
-  padding: 0.45rem 1.25rem;
-  border: none;
-  background: transparent;
-  border-radius: var(--r-sm);
-  color: var(--text-sm);
-  font-size: 0.88rem;
-  font-weight: 600;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-.a-tab:hover { color: var(--text); }
-.a-tab.active {
-  background: rgba(0,212,255,0.15);
-  color: var(--cyan);
-}
-
-/* ============================================================
    Loading Spinner
 ============================================================ */
 .a-loading {

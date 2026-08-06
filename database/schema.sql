@@ -1,96 +1,122 @@
--- VIELIST Minecraft Leaderboard — Database Schema
--- Run this once on your PostgreSQL database (e.g. Neon.tech).
--- Compatible with PostgreSQL 14+.
+-- VIELIST database schema
+-- The site intentionally stores one current King per server.
 
--- Enable UUID generation
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ============================================================
--- Announcements
--- ============================================================
+-- Remove retired ranking storage when this schema is applied to an existing
+-- installation. This is intentional: VIELIST now stores Kings only.
+DROP TABLE IF EXISTS leaderboard CASCADE;
+
 CREATE TABLE IF NOT EXISTS announcements (
-  id           TEXT        PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  type         TEXT        NOT NULL DEFAULT 'news',      -- news | update | maintenance | event
-  icon         TEXT        NOT NULL DEFAULT '📢',
-  title        TEXT        NOT NULL,
-  content      TEXT        NOT NULL,
-  date         TEXT        NOT NULL,                     -- YYYY-MM-DD display date
-  pinned       BOOLEAN     NOT NULL DEFAULT false,
-  author_username TEXT     NOT NULL DEFAULT 'VIELIST Admin',
-  author_avatar TEXT       NOT NULL DEFAULT '',
-  author_role   TEXT        NOT NULL DEFAULT 'Admin',
-  border_color  TEXT        NOT NULL DEFAULT '#00d4ff',
-  background_color TEXT    NOT NULL DEFAULT '#101827',
-  accent_color TEXT         NOT NULL DEFAULT '#00d4ff',
-  scheduled_at TIMESTAMPTZ,                              -- NULL = publish immediately
-  created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  type TEXT NOT NULL DEFAULT 'news',
+  icon TEXT NOT NULL DEFAULT '📢',
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  date TEXT NOT NULL,
+  pinned BOOLEAN NOT NULL DEFAULT false,
+  author_username TEXT NOT NULL DEFAULT 'VIELIST Admin',
+  author_avatar TEXT NOT NULL DEFAULT '',
+  author_role TEXT NOT NULL DEFAULT 'Admin',
+  border_color TEXT NOT NULL DEFAULT '#00d4ff',
+  background_color TEXT NOT NULL DEFAULT '#101827',
+  accent_color TEXT NOT NULL DEFAULT '#00d4ff',
+  scheduled_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_username TEXT NOT NULL DEFAULT 'VIELIST Admin';
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_avatar TEXT NOT NULL DEFAULT '';
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS author_role TEXT NOT NULL DEFAULT 'Admin';
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS border_color TEXT NOT NULL DEFAULT '#00d4ff';
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS background_color TEXT NOT NULL DEFAULT '#101827';
-ALTER TABLE announcements ADD COLUMN IF NOT EXISTS accent_color TEXT NOT NULL DEFAULT '#00d4ff';
-
-CREATE INDEX IF NOT EXISTS idx_announcements_date   ON announcements (date DESC);
-CREATE INDEX IF NOT EXISTS idx_announcements_pinned ON announcements (pinned DESC);
 
 CREATE TABLE IF NOT EXISTS announcement_comments (
-  id              TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   announcement_id TEXT NOT NULL REFERENCES announcements(id) ON DELETE CASCADE,
-  username        TEXT NOT NULL,
-  avatar          TEXT NOT NULL DEFAULT '',
-  content         TEXT NOT NULL,
-  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  username TEXT NOT NULL,
+  avatar TEXT NOT NULL DEFAULT '',
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- Leaderboard (supports unlimited servers & categories)
--- ============================================================
-CREATE TABLE IF NOT EXISTS leaderboard (
-  id         TEXT        PRIMARY KEY DEFAULT gen_random_uuid()::text,
-  server     TEXT        NOT NULL,                      -- is7mc | kingmc | ...
-  category   TEXT        NOT NULL DEFAULT 'king',      -- king
-  username   TEXT        NOT NULL,
-  score      INTEGER     NOT NULL DEFAULT 0,
-  rank       INTEGER     NOT NULL DEFAULT 0,
+CREATE TABLE IF NOT EXISTS settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS kings (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  server TEXT NOT NULL CHECK (server IN ('is7mc', 'kingmc')),
+  display_name TEXT NOT NULL,
+  avatar_url TEXT NOT NULL DEFAULT '',
+  reign_title TEXT NOT NULL DEFAULT 'Nhà vua',
+  description TEXT NOT NULL DEFAULT '',
+  banner_url TEXT NOT NULL DEFAULT '',
+  logo_url TEXT NOT NULL DEFAULT '',
+  crowned_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  ended_at TIMESTAMPTZ,
+  end_reason TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_king_per_server
+  ON kings(server) WHERE ended_at IS NULL;
+CREATE INDEX IF NOT EXISTS kings_history_by_server
+  ON kings(server, crowned_at DESC);
+
+CREATE TABLE IF NOT EXISTS nomination_campaigns (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  server TEXT NOT NULL CHECK (server IN ('is7mc', 'kingmc')),
+  title TEXT NOT NULL,
+  description TEXT NOT NULL DEFAULT '',
+  starts_at TIMESTAMPTZ NOT NULL,
+  ends_at TIMESTAMPTZ NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('scheduled', 'open', 'closed', 'resolved')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  UNIQUE (server, category, username)
+  CHECK (ends_at > starts_at)
 );
+CREATE INDEX IF NOT EXISTS campaigns_by_server ON nomination_campaigns(server, starts_at DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS one_active_campaign_per_server
+  ON nomination_campaigns(server) WHERE status IN ('scheduled', 'open');
 
-CREATE INDEX IF NOT EXISTS idx_leaderboard_server   ON leaderboard (server, category, rank);
-CREATE INDEX IF NOT EXISTS idx_leaderboard_username ON leaderboard (username);
-
--- ============================================================
--- Site Settings (key-value store)
--- ============================================================
-CREATE TABLE IF NOT EXISTS settings (
-  key        TEXT PRIMARY KEY,
-  value      TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS nomination_candidates (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  campaign_id TEXT NOT NULL REFERENCES nomination_campaigns(id) ON DELETE CASCADE,
+  display_name TEXT NOT NULL,
+  avatar_url TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS candidates_by_campaign ON nomination_candidates(campaign_id, created_at);
+
+CREATE TABLE IF NOT EXISTS nomination_votes (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  campaign_id TEXT NOT NULL REFERENCES nomination_campaigns(id) ON DELETE CASCADE,
+  candidate_id TEXT NOT NULL REFERENCES nomination_candidates(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL,
+  user_name TEXT NOT NULL DEFAULT '',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (campaign_id, user_id)
+);
+CREATE INDEX IF NOT EXISTS votes_by_candidate ON nomination_votes(candidate_id);
 
 INSERT INTO settings (key, value) VALUES
-  ('site_name',       'VIELIST'),
-  ('site_logo',       'VIELIST'),
-  ('logo_url',        ''),
-  ('hero_logo_url',   ''),
-  ('avatar_url',      ''),
+  ('site_name', 'VIELIST'),
+  ('site_logo', 'VIELIST'),
+  ('logo_url', ''),
+  ('hero_logo_url', ''),
+  ('avatar_url', ''),
   ('hero_banner_url', ''),
-  ('hero_title',      'Những người chơi'),
-  ('hero_highlight',  'được nhớ tên.'),
-  ('hero_lead',       'VIELIST lưu lại từng cuộc chiến, từng lần lên hạng và những cái tên làm nên lịch sử của cộng đồng Minecraft Việt Nam.'),
-  ('intro_title',     'Một mạng lưới dành cho những cái tên đáng nhớ.'),
-  ('intro_body',      'Theo dõi các server, khám phá những câu chuyện phía sau bảng xếp hạng và cùng xây dựng lịch sử Minecraft Việt Nam.'),
-  ('story_title',     'Mỗi trận đấu đều để lại dấu ấn.'),
-  ('story_body',      'Từ khoảnh khắc đầu tiên bước vào server đến ngày được xướng tên, VIELIST biến hành trình của người chơi thành một phần ký ức có thể tìm lại.'),
-  ('cta_title',       'Không chỉ là một con số.'),
-  ('cta_body',        'Khám phá những nhà vua và các thông báo mới nhất của VIELIST.'),
-  ('footer_text',     '© 2026 VIELIST — Minecraft Leaderboard'),
-  ('discord_link',    'https://discord.com'),
+  ('hero_title', 'Những người chơi'),
+  ('hero_highlight', 'được nhớ tên.'),
+  ('hero_lead', 'VIELIST lưu lại những nhà vua, những triều đại và câu chuyện của cộng đồng Minecraft Việt Nam.'),
+  ('intro_title', 'Một mạng lưới dành cho những cái tên đáng nhớ.'),
+  ('intro_body', 'Mỗi server có một ngai vàng. Mỗi triều đại đều có một câu chuyện để nhớ lại.'),
+  ('story_title', 'Một cái tên. Một triều đại. Một di sản.'),
+  ('story_body', 'VIELIST giúp cộng đồng đề cử, vinh danh và lưu giữ lịch sử những người từng đứng trên ngai vàng.'),
+  ('cta_title', 'Ai sẽ là vị vua tiếp theo?'),
+  ('cta_body', 'Đăng nhập Discord, khám phá các server và tham gia đề cử khi một đợt bình chọn mở.'),
+  ('footer_text', '© 2026 VIELIST — The home of Kings'),
+  ('discord_link', 'https://discord.com'),
   ('join_discord_enabled', 'true'),
-  ('primary_color',   '#00d4ff'),
+  ('primary_color', '#00d4ff'),
   ('effects_enabled', 'true')
 ON CONFLICT (key) DO NOTHING;
