@@ -132,9 +132,10 @@ function navigate(section) {
   switch (section) {
     case 'dashboard':     return Dashboard.load();
     case 'announcements': return Announcements.load();
-    case 'is7mc':         return KingAdmin.load('is7mc');
-    case 'kingmc':        return KingAdmin.load('kingmc');
+    case 'is7mc':         return Leaderboard.load('is7mc');
+    case 'kingmc':        return Leaderboard.load('kingmc');
     case 'settings':      return Settings.load();
+    case 'mcc':            return MccAdmin.load();
   }
 }
 
@@ -194,16 +195,15 @@ const Dashboard = {
         '<span class="a-db-status ' + dbClass + '">' + dbText + '</span></div>' +
         '<div class="a-stats-grid">' +
           stat('📣', fmtNum(s.announcements), 'Thông báo') +
-           stat('♛', fmtNum(s.kings),          'Vua đang trị vì') +
-           stat('◈', fmtNum(s.campaigns),      'Đợt đề cử đang mở') +
+          stat('🏆', fmtNum(s.leaderboard),   'Leaderboard entries') +
           stat('🕐', new Date(s.updated_at).toLocaleTimeString('vi-VN'), 'Cập nhật lúc') +
         '</div>' +
         '<div class="glass-card" style="margin-top:1.5rem">' +
           '<h3 style="font-size:.95rem;color:var(--text-sm);margin-bottom:1rem">⚡ Thao tác nhanh</h3>' +
           '<div class="btn-group">' +
             '<button class="btn btn-primary" onclick="navigate(\'announcements\')">📣 Thông báo</button>' +
-             '<button class="btn btn-ghost"   onclick="navigate(\'is7mc\')">IS7MC · King</button>' +
-             '<button class="btn btn-ghost"   onclick="navigate(\'kingmc\')">KINGMC · King</button>' +
+            '<button class="btn btn-ghost"   onclick="navigate(\'is7mc\')">🌐 IS7MC</button>' +
+            '<button class="btn btn-ghost"   onclick="navigate(\'kingmc\')">🏰 KINGMC</button>' +
             '<button class="btn btn-ghost"   onclick="navigate(\'settings\')">⚙️ Settings</button>' +
           '</div>' +
         '</div>'
@@ -382,123 +382,97 @@ function setupAnnouncementEditor() {
 }
 
 /* ============================================================
-   King administration: one current King, campaigns, candidates,
-   and an auditable history for each server.
+   King leaderboard CRUD (IS7MC & KINGMC)
 ============================================================ */
-const KingAdmin = {
-  server: 'is7mc', king: null, history: [], campaigns: [],
+const Leaderboard = {
+  server: 'is7mc',
+  category: 'king',
+  data: { king: [] },
+
   async load(server) {
-    this.server = server; loading();
+    this.server   = server;
+    this.category = 'king';
+    loading();
     try {
-      var results = await Promise.all([
-        AdminAPI.getKing(server), AdminAPI.getHistory(server), AdminAPI.getCampaigns(server)
-      ]);
-      this.king = results[0].king; this.history = results[1].data || []; this.campaigns = results[2].data || [];
+      this.data = await AdminAPI.getLeaderboard(server);
       this.render();
     } catch (e) {
-      setContent('<div class="empty-state"><div class="icon">!</div><h3>' + esc(e.message) + '</h3></div>');
+      setContent('<div class="empty-state"><div class="icon">⚠️</div><h3>' + esc(e.message) + '</h3></div>');
     }
   },
-  kingForm(k) {
-    k = k || {};
-    return '<div class="form-group"><label>Tên vua *</label><input name="display_name" value="' + esc(k.display_name || '') + '" required></div>' +
-      '<div class="form-group"><label>Avatar URL</label><input name="avatar_url" type="url" value="' + esc(k.avatar_url || '') + '"></div>' +
-      '<div class="form-group"><label>Tên triều đại</label><input name="reign_title" value="' + esc(k.reign_title || 'Nhà vua') + '"></div>' +
-      '<div class="form-group"><label>Ngày lên ngôi</label><input name="crowned_at" type="datetime-local" value="' + esc(k.crowned_at ? new Date(k.crowned_at).toISOString().slice(0,16) : '') + '"></div>' +
-      '<div class="form-group"><label>Mô tả</label><textarea name="description" rows="3">' + esc(k.description || '') + '</textarea></div>' +
-      '<div class="form-group"><label>Banner URL</label><input name="banner_url" type="url" value="' + esc(k.banner_url || '') + '"></div>' +
-      '<div class="form-group"><label>Logo URL</label><input name="logo_url" type="url" value="' + esc(k.logo_url || '') + '"></div>';
-  },
-  campaignForm(c) {
-    c = c || {};
-    var local = function (v) { return v ? new Date(v).toISOString().slice(0,16) : ''; };
-    return '<div class="form-group"><label>Tiêu đề đợt đề cử *</label><input name="title" value="' + esc(c.title || '') + '" required></div>' +
-      '<div class="form-group"><label>Mô tả</label><textarea name="description" rows="3">' + esc(c.description || '') + '</textarea></div>' +
-      '<div class="form-group"><label>Bắt đầu (ngày & giờ) *</label><input name="starts_at" type="datetime-local" value="' + esc(local(c.starts_at)) + '" required></div>' +
-      '<div class="form-group"><label>Kết thúc (ngày & giờ) *</label><input name="ends_at" type="datetime-local" value="' + esc(local(c.ends_at)) + '" required></div>';
-  },
-  candidateForm(c) {
-    c = c || {};
-    return '<div class="form-group"><label>Tên ứng viên *</label><input name="display_name" value="' + esc(c.display_name || '') + '" required></div>' +
-      '<div class="form-group"><label>Avatar URL</label><input name="avatar_url" type="url" value="' + esc(c.avatar_url || '') + '"></div>' +
-      '<div class="form-group"><label>Mô tả</label><textarea name="description" rows="3">' + esc(c.description || '') + '</textarea></div>';
-  },
+
   render() {
-    var self = this;
-    var label = self.server === 'is7mc' ? 'IS7MC.NET' : 'KINGMC.VN';
-    var king = self.king;
-    var history = self.history.map(function (k) {
-      return '<tr><td>' + esc(k.display_name) + '</td><td>' + esc(k.reign_title) + '</td><td>' + fmtDate(k.crowned_at) + '</td><td>' + (k.ended_at ? fmtDate(k.ended_at) : '<strong>Đang trị vì</strong>') + '</td><td>' +
-        (!k.ended_at ? '<button class="btn btn-edit btn-sm" onclick="KingAdmin.endKing(\'' + esc(k.id) + '\')">Kết thúc</button>' : '') +
-        '<button class="btn btn-danger btn-sm" onclick="KingAdmin.deleteHistory(\'' + esc(k.id) + '\')">Xóa</button></td></tr>';
-    }).join('') || '<tr><td colspan="5" class="empty-cell">Chưa có lịch sử.</td></tr>';
-    var campaigns = self.campaigns.map(function (c) {
-      var candidates = (c.candidates || []).map(function (candidate) {
-        return '<li><span>' + esc(candidate.display_name) + ' · ' + candidate.votes + ' đề cử</span><button class="btn btn-danger btn-sm" onclick="KingAdmin.deleteCandidate(\'' + esc(c.id) + '\',\'' + esc(campaignId(c)) + '\')">Xóa</button></li>';
-      }).join('') || '<li class="muted-row">Chưa có ứng viên.</li>';
-      return '<article class="admin-campaign glass-card"><div class="a-toolbar"><div><span class="section-kicker">' + esc(c.status) + '</span><h3>' + esc(c.title) + '</h3><p>' + esc(c.description) + '</p><small>' + fmtDate(c.starts_at) + ' → ' + fmtDate(c.ends_at) + '</small></div><div class="btn-group"><button class="btn btn-edit btn-sm" onclick="KingAdmin.editCampaign(\'' + esc(c.id) + '\')">Sửa</button><button class="btn btn-primary btn-sm" onclick="KingAdmin.addCandidate(\'' + esc(c.id) + '\')">Thêm ứng viên</button><button class="btn btn-danger btn-sm" onclick="KingAdmin.deleteCampaign(\'' + esc(c.id) + '\')">Xóa</button></div></div><ul class="candidate-admin-list">' + candidates + '</ul></article>';
-    }).join('') || '<p class="muted-row">Chưa có đợt đề cử nào.</p>';
+    var self  = this;
+    var label = self.server === 'is7mc' ? '🌐 IS7MC.NET' : '🏰 KINGMC.VN';
+    var rows  = (self.data[self.category] || []);
+
+    var tableHtml = rows.map(function (p) {
+      var rc = p.rank <= 3 ? ['🥇','🥈','🥉'][p.rank-1] : '#' + p.rank;
+      return '<tr>' +
+        '<td>' + rc + '</td>' +
+        '<td><img src="https://crafatar.com/avatars/' + encodeURIComponent(p.username) + '?size=32&overlay=true" ' +
+             'width="28" height="28" style="border-radius:4px;vertical-align:middle;margin-right:8px;image-rendering:pixelated">' +
+             esc(p.username) + '</td>' +
+        '<td class="score-cell">' + fmtNum(p.score) + '</td>' +
+        '<td class="cell-actions">' +
+          '<button class="btn btn-edit btn-sm" onclick="Leaderboard.edit(\'' + esc(p.id) + '\')">✏️</button>' +
+          '<button class="btn btn-danger btn-sm" onclick="Leaderboard.del(\'' + esc(p.id) + '\')">🗑️</button>' +
+        '</td>' +
+      '</tr>';
+    }).join('') || '<tr><td colspan="4" style="text-align:center;padding:2rem;color:var(--text-xs)">Chưa có dữ liệu</td></tr>';
+
     setContent(
-      '<div class="a-page-header"><h1>' + label + ' · King</h1><p>Quản lý ngai vàng, đề cử và lịch sử của server này.</p></div>' +
-      '<div class="admin-king-grid"><section class="glass-card admin-king-card"><div class="a-toolbar"><div><span class="section-kicker">CURRENT KING</span><h2>' + (king ? esc(king.display_name) : 'Chưa có vua') + '</h2></div><button class="btn btn-primary" onclick="KingAdmin.' + (king ? 'editKing' : 'createKing') + '()"> ' + (king ? 'Chỉnh sửa vua' : 'Thêm vua trực tiếp') + '</button></div>' +
-      (king ? '<p>' + esc(king.description || 'Chưa có mô tả.') + '</p><small>Triều đại: ' + esc(king.reign_title) + ' · Lên ngôi: ' + fmtDate(king.crowned_at) + '</small>' : '<p class="muted-row">Chưa có ai làm vua. Bạn có thể thêm trực tiếp hoặc mở một đợt đề cử.</p>') + '</section>' +
-      '<section class="glass-card"><div class="a-toolbar"><div><span class="section-kicker">NOMINATION</span><h2>Các đợt đề cử</h2></div><button class="btn btn-primary" onclick="KingAdmin.createCampaign()">Tạo đợt đề cử</button></div>' + campaigns + '</section></div>' +
-      '<section class="glass-card admin-history-card"><div class="a-toolbar"><div><span class="section-kicker">ROYAL ARCHIVE</span><h2>Lịch sử vua</h2></div></div><div class="a-table-wrap"><table class="a-table"><thead><tr><th>Tên</th><th>Triều đại</th><th>Lên ngôi</th><th>Kết thúc</th><th>Hành động</th></tr></thead><tbody>' + history + '</tbody></table></div></section>'
+      '<div class="a-page-header"><h1>' + label + '</h1><p>Quản lý bảng xếp hạng King.</p></div>' +
+      '<div class="a-toolbar">' +
+        '<h2>' + self.category.toUpperCase() + ' — ' + rows.length + ' người</h2>' +
+        '<button class="btn btn-primary" onclick="Leaderboard.create()">➕ Thêm Player</button>' +
+      '</div>' +
+      '<div class="a-table-wrap"><table class="a-table">' +
+        '<thead><tr><th>#</th><th>Người chơi</th><th>Điểm</th><th>Hành động</th></tr></thead>' +
+        '<tbody>' + tableHtml + '</tbody>' +
+      '</table></div>'
     );
   },
-  createKing() {
+
+  switchTab(cat) { this.category = cat; this.render(); },
+
+  _form(entry) {
+    entry = entry || {};
+    return '<div class="form-group"><label>Tên Minecraft *</label><input name="username" value="' + esc(entry.username||'') + '" required/></div>' +
+      '<div class="form-group"><label>Điểm *</label><input type="number" name="score" value="' + esc(entry.score||0) + '" min="0" required/></div>' +
+      (entry.id ? '<div class="form-group"><label>Rank (để trống = tự tính)</label><input type="number" name="rank" value="' + esc(entry.rank||'') + '" min="1"/></div>' : '');
+  },
+
+  create() {
     var self = this;
-    Modal.show('Thêm vua trực tiếp', self.kingForm(), async function () {
-      var f = getFormData('a-modal-body'); if (!f.display_name) throw new Error('Nhập tên vua');
-      await AdminAPI.addKing(self.server, f); Modal.hide(); toast('Đã thêm vua.'); await self.load(self.server);
+    Modal.show('➕ Thêm nhà vua vào ' + self.server.toUpperCase(), self._form({ category: 'king' }), async function () {
+      var f = getFormData('a-modal-body');
+      if (!f.username) throw new Error('Điền Username và Điểm');
+      f.category = 'king';
+      await AdminAPI.addLbEntry(self.server, f);
+      Modal.hide(); toast('Đã thêm player!'); await self.load(self.server);
     });
   },
-  editKing() {
-    var self = this;
-    Modal.show('Chỉnh sửa nhà vua', self.kingForm(self.king), async function () {
-      var f = getFormData('a-modal-body'); f.id = self.king.id;
-      await AdminAPI.updateKing(self.server, f); Modal.hide(); toast('Đã cập nhật nhà vua.'); await self.load(self.server);
+
+  edit(id) {
+    var self  = this;
+    var entry = (self.data[self.category] || []).find(function (p) { return p.id === id; });
+    if (!entry) return;
+    Modal.show('✏️ Sửa ' + esc(entry.username), self._form(entry), async function () {
+      var f = getFormData('a-modal-body');
+      await AdminAPI.updateLbEntry(self.server, id, f);
+      Modal.hide(); toast('Đã cập nhật.'); await self.load(self.server);
     });
   },
-  createCampaign() {
-    var self = this;
-    Modal.show('Tạo đợt đề cử', self.campaignForm(), async function () {
-      var f = getFormData('a-modal-body'); await AdminAPI.createCampaign(self.server, f);
-      Modal.hide(); toast('Đã tạo đợt đề cử.'); await self.load(self.server);
-    });
-  },
-  editCampaign(id) {
-    var self = this; var item = self.campaigns.find(function (c) { return c.id === id; }); if (!item) return;
-    Modal.show('Sửa đợt đề cử', self.campaignForm(item), async function () {
-      var f = getFormData('a-modal-body'); f.id = id; await AdminAPI.updateCampaign(self.server, f);
-      Modal.hide(); toast('Đã cập nhật đợt đề cử.'); await self.load(self.server);
-    });
-  },
-  addCandidate(campaignIdValue) {
-    var self = this;
-    Modal.show('Thêm ứng viên', self.candidateForm(), async function () {
-      var f = getFormData('a-modal-body'); await AdminAPI.addCandidate(campaignIdValue, f);
-      Modal.hide(); toast('Đã thêm ứng viên.'); await self.load(self.server);
-    });
-  },
-  async deleteCandidate(id, campaignIdValue) {
-    if (!await Confirm.show('Xóa ứng viên?', 'Phiếu đề cử của ứng viên này cũng sẽ bị xóa.')) return;
-    try { await AdminAPI.deleteCandidate(campaignIdValue, { id: id }); toast('Đã xóa ứng viên.', 'error'); await this.load(this.server); } catch (e) { toast(e.message, 'error'); }
-  },
-  async deleteCampaign(id) {
-    if (!await Confirm.show('Xóa đợt đề cử?', 'Toàn bộ ứng viên và phiếu của đợt này sẽ bị xóa.')) return;
-    try { await AdminAPI.deleteCampaign(this.server, { id: id }); toast('Đã xóa đợt đề cử.', 'error'); await this.load(this.server); } catch (e) { toast(e.message, 'error'); }
-  },
-  async endKing(id) {
-    var reason = prompt('Nhập lý do kết thúc triều đại:'); if (!reason) return;
-    try { await AdminAPI.endKing(this.server, { id: id, reason: reason }); toast('Đã kết thúc triều đại.'); await this.load(this.server); } catch (e) { toast(e.message, 'error'); }
-  },
-  async deleteHistory(id) {
-    var reason = prompt('Nhập lý do xóa khỏi lịch sử:'); if (!reason) return;
-    try { await AdminAPI.deleteHistory(this.server, { id: id, reason: reason }); toast('Đã xóa khỏi lịch sử.', 'error'); await this.load(this.server); } catch (e) { toast(e.message, 'error'); }
+
+  async del(id) {
+    var entry = (this.data[this.category] || []).find(function (p) { return p.id === id; });
+    var ok    = await Confirm.show('Xóa khỏi bảng?', entry ? entry.username : id);
+    if (!ok) return;
+    try { await AdminAPI.deleteLbEntry(this.server, id); toast('Đã xóa.', 'error'); await this.load(this.server); }
+    catch (e) { toast(e.message, 'error'); }
   }
 };
-function campaignId(c) { return c.id; }
 
 /* ============================================================
    Settings
@@ -536,7 +510,7 @@ const Settings = {
         '<div class="form-group"><label>Nội dung cuối trang</label><textarea id="cfg-cta-body" rows="3">' + esc(s.cta_body||'') + '</textarea></div>' +
         '<div class="form-group"><label>Text Footer</label><input id="cfg-footer" value="' + esc(s.footer_text||'') + '"/></div>' +
         '<div class="form-group"><label>Link Discord</label><input id="cfg-discord-link" type="url" value="' + esc(s.discord_link||'https://discord.com') + '" placeholder="https://discord.gg/..."/></div>' +
-          '<div class="form-group"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="cfg-join-discord"' + (s.join_discord_enabled !== 'false' ? ' checked' : '') + ' style="width:auto"/> Hiển thị lời mời tham gia Discord</label></div>' +
+        '<div class="form-group"><label style="display:flex;align-items:center;gap:.5rem;cursor:pointer"><input type="checkbox" id="cfg-join-discord"' + (s.join_discord_enabled !== 'false' ? ' checked' : '') + ' style="width:auto"/> Hiển thị lời mời tham gia Discord trong profile</label></div>' +
       '</div>' +
       '<div class="glass-card settings-card settings-card-compact">' +
         '<div class="settings-card-heading"><div><span class="section-kicker">APPEARANCE</span><h2>Màu & hiệu ứng</h2></div></div>' +
@@ -648,6 +622,40 @@ function getFormData(containerId) {
   });
   return data;
 }
+
+/* ============================================================
+   MCC key + IP monitoring
+============================================================ */
+const MccAdmin = {
+  async load() {
+    loading();
+    try {
+      const payload = await AdminAPI.getMcc();
+      const blocked = new Set((payload.blocks || []).map(function (b) { return b.ip_address; }));
+      setContent(
+        '<div class="a-page-heading"><div><span class="section-kicker">MCC CONTROL</span><h1>IP MCC & GetKey</h1><p>Theo dõi client, lịch sử key và khóa IP.</p></div></div>' +
+        '<div class="glass-card settings-card"><div class="settings-card-heading"><div><h2>IP đang hoạt động / bị cấm</h2></div></div>' +
+        '<div class="a-table-wrap"><table class="a-table"><thead><tr><th>IP</th><th>Trạng thái</th><th>Lý do</th><th></th></tr></thead><tbody>' +
+        (payload.blocks || []).map(function (b) {
+          return '<tr><td><code>'+esc(b.ip_address)+'</code></td><td><span class="status-pill status-pill-danger">BỊ CẤM</span></td><td>'+esc(b.reason)+'</td><td><button class="btn btn-ghost btn-sm mcc-unblock" data-ip="'+esc(b.ip_address)+'">Mở cấm</button></td></tr>';
+        }).join('') +
+        (payload.keys || []).filter(function(k){return !blocked.has(k.ip_address) && k.last_seen_at;}).map(function(k){
+          return '<tr><td><code>'+esc(k.ip_address)+'</code></td><td><span class="status-pill status-pill-success">ĐANG CHẠY</span></td><td>'+esc(k.discord_username)+' · heartbeat '+fmtDate(k.last_seen_at)+'</td><td><button class="btn btn-danger btn-sm mcc-block" data-ip="'+esc(k.ip_address)+'">Cấm IP</button></td></tr>';
+        }).join('') +
+        '</tbody></table></div></div>' +
+        '<div class="glass-card settings-card"><div class="settings-card-heading"><div><h2>Danh sách key</h2><p>Key được ẩn một phần trong admin log; có thể vô hiệu hóa ngay.</p></div></div>' +
+        '<div class="a-table-wrap"><table class="a-table"><thead><tr><th>Key</th><th>Discord</th><th>IP</th><th>Hạn</th><th></th></tr></thead><tbody>' +
+        (payload.keys || []).map(function(k){
+          var active = !k.revoked_at && new Date(k.expires_at) > new Date();
+          return '<tr><td><code>'+esc(k.key_code)+'</code></td><td>'+esc(k.discord_username)+'</td><td>'+esc(k.ip_address)+'</td><td>'+fmtDate(k.expires_at)+'</td><td>'+(active?'<button class="btn btn-danger btn-sm mcc-revoke" data-id="'+esc(k.id)+'">Vô hiệu hóa</button>':'<span class="status-pill status-pill-danger">HẾT HẠN</span>')+'</td></tr>';
+        }).join('')+'</tbody></table></div></div>'
+      );
+      document.querySelectorAll('.mcc-block').forEach(function(b){b.onclick=async function(){if(await Confirm.show('Cấm IP này?','Key của IP sẽ bị vô hiệu hóa.')){await AdminAPI.blockMccIp(b.dataset.ip,'Admin block');MccAdmin.load();}}});
+      document.querySelectorAll('.mcc-unblock').forEach(function(b){b.onclick=async function(){await AdminAPI.unblockMccIp(b.dataset.ip);MccAdmin.load();}});
+      document.querySelectorAll('.mcc-revoke').forEach(function(b){b.onclick=async function(){if(await Confirm.show('Vô hiệu hóa key?','Client đang dùng key sẽ bị từ chối ở heartbeat tiếp theo.')){await AdminAPI.revokeMccKey(b.dataset.id);MccAdmin.load();}}});
+    } catch (e) { setContent('<div class="glass-card"><h2>Không tải được MCC</h2><p>'+esc(e.message)+'</p></div>'); }
+  }
+};
 
 /* ============================================================
    Init — Discord OAuth2 auth check

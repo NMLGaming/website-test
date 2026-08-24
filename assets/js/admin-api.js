@@ -32,7 +32,7 @@ const AdminAPI = (function () {
   const _get  = (url)       => _req('GET',    url, null);
   const _post = (url, body) => _req('POST',   url, body);
   const _put  = (url, body) => _req('PUT',    url, body);
-  const _del  = (url)       => _req('DELETE', url, null);
+  const _del  = (url, body) => _req('DELETE', url, body || null);
 
   return {
     // ---- Auth ----
@@ -49,20 +49,11 @@ const AdminAPI = (function () {
     updateAnnouncement(id, d)   { return _put('/api/auth/data?resource=announcements&id=' + id, d); },
     deleteAnnouncement(id)      { return _del('/api/auth/data?resource=announcements&id=' + id); },
 
-    // ---- King, campaigns and history ----
-    getKing(server) { return _get('/api/auth/data?resource=king&server=' + server); },
-    addKing(server, d) { return _post('/api/auth/data?resource=king&server=' + server, d); },
-    updateKing(server, d) { return _put('/api/auth/data?resource=king&server=' + server, d); },
-    getHistory(server) { return _get('/api/auth/data?resource=history&server=' + server); },
-    endKing(server, d) { return _post('/api/auth/data?resource=history&server=' + server, d); },
-    deleteHistory(server, d) { return _req('DELETE', '/api/auth/data?resource=history&server=' + server, d); },
-    getCampaigns(server) { return _get('/api/auth/data?resource=campaigns&server=' + server); },
-    createCampaign(server, d) { return _post('/api/auth/data?resource=campaigns&server=' + server, d); },
-    updateCampaign(server, d) { return _put('/api/auth/data?resource=campaigns&server=' + server, d); },
-    deleteCampaign(server, d) { return _req('DELETE', '/api/auth/data?resource=campaigns&server=' + server, d); },
-    addCandidate(campaignId, d) { return _post('/api/auth/data?resource=candidates&campaign_id=' + campaignId, d); },
-    updateCandidate(campaignId, d) { return _put('/api/auth/data?resource=candidates&campaign_id=' + campaignId, d); },
-    deleteCandidate(campaignId, d) { return _req('DELETE', '/api/auth/data?resource=candidates&campaign_id=' + campaignId, d); },
+    // ---- Leaderboard ----
+    getLeaderboard(server)         { return _get('/api/auth/data?resource=leaderboard&server=' + server); },
+    addLbEntry(server, d)          { return _post('/api/auth/data?resource=leaderboard&server=' + server, d); },
+    updateLbEntry(server, id, d)   { return _put('/api/auth/data?resource=leaderboard&server=' + server + '&id=' + id, d); },
+    deleteLbEntry(server, id)      { return _del('/api/auth/data?resource=leaderboard&server=' + server + '&id=' + id); },
 
     // ---- Settings ----
     async getSettings() {
@@ -92,5 +83,9 @@ const AdminAPI = (function () {
 
     // ---- Stats ----
     getStats() { return _get('/api/auth/data?resource=stats'); },
+    getMcc() { return _get('/api/auth/data?resource=mcc-admin'); },
+    revokeMccKey(id) { return _del('/api/auth/data?resource=mcc-admin', { key_id: id }); },
+    blockMccIp(ip, reason) { return _post('/api/auth/data?resource=mcc-admin', { ip_address: ip, reason: reason }); },
+    unblockMccIp(ip) { return _put('/api/auth/data?resource=mcc-admin', { ip_address: ip }); },
   };
 })();

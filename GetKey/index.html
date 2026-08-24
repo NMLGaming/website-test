@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>GetKey — VIELIST</title><link rel="stylesheet" href="/style.css">
+  <style>
+    .key-main{min-height:calc(100vh - 90px);display:grid;place-items:center;padding:5rem 1rem}
+    .key-card{width:min(560px,100%);text-align:center;padding:2.4rem;border:1px solid rgba(0,212,255,.25)}
+    .key-card h1{font-size:clamp(2rem,6vw,4rem);margin:.5rem 0}.key-card p{color:var(--text-sm)}
+    .challenge{display:grid;gap:.8rem;margin:2rem 0}.challenge button{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.2rem;border:1px solid #374151;border-radius:14px;background:#111827;color:#fff;cursor:pointer;font-weight:700}.challenge button.done{border-color:#35d07f;color:#35d07f}.timer{font-variant-numeric:tabular-nums;color:#8b949e}.key-code{display:block;margin:1.5rem 0;padding:1rem;background:#05070b;border:1px dashed #00d4ff;color:#65e6ff;font:700 1.25rem monospace;letter-spacing:.08em}.key-note{font-size:.8rem}
+  </style>
+</head>
+<body>
+<nav><a class="nav-logo" href="/">VIELIST</a><ul class="nav-links"><li><a href="/">Home</a></li><li><a href="/is7mc">IS7MC</a></li><li><a href="/kingmc">KINGMC</a></li><li><a href="/GetKey" class="active">GetKey</a></li></ul><div class="nav-auth" id="nav-auth"></div></nav>
+<main class="key-main"><section class="glass-card key-card" id="app"><span class="section-kicker">MCC LICENSE GATE</span><h1>GetKey</h1><p id="intro">Đang kiểm tra phiên Discord…</p></section></main>
+<script src="/assets/js/auth-nav.js"></script><script>
+(async function(){const app=document.getElementById('app'), intro=document.getElementById('intro');let me=await fetch('/api/auth/me',{credentials:'include'}).then(r=>r.json()).catch(()=>({}));
+if(!me.authenticated){intro.innerHTML='Bạn cần đăng nhập Discord trước khi lấy key.<br><br><a class="btn btn-primary btn-lg" href="/api/auth/discord?redirect=/GetKey">Đăng nhập Discord ↗</a>';return}
+let r=await fetch('/api/auth/data?resource=getkey',{credentials:'include'}).then(x=>x.json());
+if(r.data){showCurrent(r.data);return}
+intro.textContent='Hoàn thành các bước để mở khóa license 24 giờ.';const box=document.createElement('div');box.className='challenge';let done=0;
+['Complete the survey','Discover the best app','Watch a video'].sort(()=>Math.random()-.5).slice(0,1+Math.floor(Math.random()*3)).forEach((label,i)=>{let b=document.createElement('button');b.innerHTML='<span>◈ '+label+'</span><span class="timer">BẮT ĐẦU</span>';b.onclick=()=>{if(b.classList.contains('done'))return;b.disabled=true;let left=60;b.querySelector('.timer').textContent=left+'s';let t=setInterval(()=>{left--;b.querySelector('.timer').textContent=left+'s';if(left<=0){clearInterval(t);b.classList.add('done');b.querySelector('.timer').textContent='✓ HOÀN THÀNH';done++;if(done===box.children.length){unlock.disabled=false;intro.textContent='Đã hoàn thành. Nhấn mở khóa để nhận key.'}}},1000)};box.appendChild(b)});app.appendChild(box);let unlock=document.createElement('button');unlock.className='btn btn-primary btn-lg';unlock.disabled=true;unlock.textContent='🔒 MỞ KHÓA KEY';unlock.onclick=async()=>{let x=await fetch('/api/auth/data?resource=getkey',{method:'POST',credentials:'include',headers:{'Content-Type':'application/json'},body:'{}'}).then(q=>q.json());if(x.data)showCurrent(x.data);else intro.textContent=x.error||'Không thể tạo key'};app.appendChild(unlock);
+function showCurrent(d){app.innerHTML='<span class="section-kicker">LICENSE ACTIVE</span><h1>Key của bạn</h1><p>Key còn hiệu lực đến '+new Date(d.expires_at).toLocaleString('vi-VN')+':</p><span class="key-code">'+(d.key||'Không thể tải key')+'</span><p class="key-note">Mỗi IP/Discord chỉ có một key hoạt động. Key tự hết hạn sau 24 giờ.</p>'}
+})();
+</script>
+</body></html>
