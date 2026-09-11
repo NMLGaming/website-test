@@ -14,6 +14,11 @@ looked like a failed connection.
    server-side and kept in an HttpOnly cookie; it is not written to
    localStorage.
 
+If connection fails, the dialog now shows the real HTTP/network reason. A
+`401` means Discord rejected the credential; `404`, `405`, or an HTML response
+means the deployed project is still using the old static export or the wrong
+Vercel root; `502` means the Vercel function could not reach Discord.
+
 If you already run the original always-on bot API, set its public URL in
 `config.js` instead:
 
