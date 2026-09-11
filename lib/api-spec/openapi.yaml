@@ -1,0 +1,314 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: bot
+    description: Discord bot connection and channel discovery
+  - name: messages
+    description: LayoutView message sending and scheduling
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /bot/status:
+    get:
+      operationId: getBotStatus
+      tags: [bot]
+      summary: Get current Discord bot status
+      responses:
+        "200":
+          description: Current bot status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+  /bot/connect:
+    post:
+      operationId: connectBot
+      tags: [bot]
+      summary: Connect the Discord bot with a token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BotConnectInput"
+      responses:
+        "200":
+          description: Connected bot status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+        "400":
+          description: Invalid token or connection failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bot/disconnect:
+    post:
+      operationId: disconnectBot
+      tags: [bot]
+      summary: Disconnect the Discord bot
+      responses:
+        "200":
+          description: Disconnected bot status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BotStatus"
+  /bot/guilds:
+    get:
+      operationId: listBotGuilds
+      tags: [bot]
+      summary: List Discord servers visible to the bot
+      responses:
+        "200":
+          description: Discord servers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Guild"
+        "409":
+          description: Bot is not connected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /bot/guilds/{guildId}/channels:
+    get:
+      operationId: listGuildChannels
+      tags: [bot]
+      summary: List text channels in a Discord server
+      parameters:
+        - name: guildId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Text channels
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Channel"
+        "404":
+          description: Server not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /messages/send:
+    post:
+      operationId: sendLayoutMessage
+      tags: [messages]
+      summary: Send a LayoutView message immediately
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageSendInput"
+      responses:
+        "200":
+          description: Sent message activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageActivity"
+        "400":
+          description: Message could not be sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /messages/schedules:
+    get:
+      operationId: listMessageSchedules
+      tags: [messages]
+      summary: List scheduled messages
+      responses:
+        "200":
+          description: Scheduled and recent message activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MessageActivity"
+    post:
+      operationId: scheduleLayoutMessage
+      tags: [messages]
+      summary: Schedule a LayoutView message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageScheduleInput"
+      responses:
+        "201":
+          description: Scheduled message activity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageActivity"
+        "400":
+          description: Schedule could not be created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    BotConnectInput:
+      type: object
+      properties:
+        token:
+          type: string
+          minLength: 20
+      required:
+        - token
+    BotStatus:
+      type: object
+      properties:
+        connected:
+          type: boolean
+        username:
+          type: ["string", "null"]
+        tag:
+          type: ["string", "null"]
+        guildCount:
+          type: integer
+        lastConnectedAt:
+          type: ["string", "null"]
+      required:
+        - connected
+        - username
+        - tag
+        - guildCount
+        - lastConnectedAt
+    Guild:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: ["string", "null"]
+        channelCount:
+          type: integer
+      required: [id, name, icon, channelCount]
+    Channel:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+        position:
+          type: integer
+      required: [id, name, type, position]
+    MessageSendInput:
+      type: object
+      properties:
+        guildId:
+          type: string
+        channelId:
+          type: string
+        layout:
+          type: object
+          additionalProperties: true
+        code:
+          type: string
+      required: [guildId, channelId, layout, code]
+    MessageScheduleInput:
+      type: object
+      properties:
+        guildId:
+          type: string
+        channelId:
+          type: string
+        layout:
+          type: object
+          additionalProperties: true
+        code:
+          type: string
+        scheduledFor:
+          type: string
+          format: date-time
+      required: [guildId, channelId, layout, code, scheduledFor]
+    MessageActivity:
+      type: object
+      properties:
+        id:
+          type: string
+        guildId:
+          type: string
+        guildName:
+          type: string
+        channelId:
+          type: string
+        channelName:
+          type: string
+        status:
+          type: string
+          enum: [sent, scheduled, failed]
+        scheduledFor:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        previewTitle:
+          type: string
+      required:
+        - id
+        - guildId
+        - guildName
+        - channelId
+        - channelName
+        - status
+        - scheduledFor
+        - createdAt
+        - previewTitle
+

@@ -1,0 +1,11 @@
+{
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "PORT=23280 BASE_PATH=/ pnpm --filter @workspace/layoutview-sender run build",
+  "outputDirectory": "artifacts/layoutview-sender/dist/public",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
